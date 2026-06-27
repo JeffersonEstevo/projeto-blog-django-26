@@ -11,21 +11,50 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 from pathlib import Path
+# Importa o módulo nativo do Python para interagir com o Sistema Operacional (ler variáveis de ambiente, etc.)
+import os  
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# /data/web/static  <- Comentário indicando onde a pasta de arquivos estáticos (CSS, JS, Imagens do tema) ficará no servidor.
+# /data/web/media   <- Comentário indicando onde a pasta de arquivos de mídia (uploads dos usuários, como fotos de perfil) ficará.
+# Esta linha cria um caminho de diretório dinâmico usando a biblioteca pathlib (padrão do Django moderno).
+# 1. BASE_DIR é a pasta principal do seu projeto.
+# 2. .parent sobe um nível na pasta (vai para a pasta "mãe" do projeto).
+# 3. / 'data' / 'web' junta os pedaços para formar o caminho final (ex: se o projeto está em /home/user/projeto, o DATA_DIR será /home/user/data/web).
+DATA_DIR = BASE_DIR.parent / 'data' / 'web'
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-ww==014%ead!1@_58ob$cv8x+7i514ofq=1=m91&-ft-thy@sa'
+# Define a chave secreta da aplicação (essencial para criptografia, sessões e tokens de segurança).
+# 1. os.getenv('SECRET_KEY', 'change-me') busca a variável de ambiente chamada 'SECRET_KEY'.
+# 2. Se a variável existir no servidor, o código usa o valor real dela.
+# 3. Se ela NÃO existir (ex: você rodando o projeto localmente pela primeira vez), ele usa 'change-me' como um valor padrão temporário.
+SECRET_KEY = os.getenv('SECRET_KEY', 'change-me')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# Esta linha abaixo define se o Django rodará em modo de depuração (DEBUG).
+# 1. os.getenv('DEBUG', 0) busca uma variável de ambiente chamada 'DEBUG'. Se ela não existir, usa '0' como padrão.
+# 2. int(...) transforma esse valor em um número inteiro (ex: "1" vira 1, "0" vira 0).
+# 3. bool(...) transforma o número em Booleano: 0 vira False (seguro para produção) e qualquer outro número vira True.
+DEBUG = bool(int(os.getenv('DEBUG', 0)))
 
-ALLOWED_HOSTS = []
+# Esta seção configura quais domínios/hosts podem acessar a sua aplicação (importante para segurança contra ataques de HTTP Host Header).
+ALLOWED_HOSTS = [
+    # h.strip() remove espaços em branco invisíveis no início e no fim de cada host (ex: " google.com " vira "google.com")
+    h.strip() 
+    
+    # os.getenv('ALLOWED_HOSTS', '') busca a lista de hosts na variável de ambiente. Se não achar, usa uma string vazia ''.
+    # .split(',') divide essa string em uma lista a cada vírgula encontrada (ex: "site1.com,site2.com" vira ['site1.com', 'site2.com'])
+    for h in os.getenv('ALLOWED_HOSTS', '').split(',')
+    
+    # if h.strip() é uma validação: só adiciona o host na lista final se ele não estiver vazio. 
+    # Isso evita que o código quebre ou adicione itens inválidos caso haja uma vírgula sobrando no final.
+    if h.strip()
+]
 
 
 # Application definition
@@ -71,11 +100,27 @@ WSGI_APPLICATION = 'project.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
-
+# O dicionário DATABASES define as conexões com bancos de dados que o Django vai usar.
 DATABASES = {
+    # 'default' é a conexão principal do projeto. O Django exige que exista pelo menos uma conexão com esse nome.
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        # 'ENGINE' define qual banco será usado (ex: 'django.db.backends.postgresql', 'django.db.backends.mysql', etc.)
+        'ENGINE': os.getenv('DB_ENGINE', 'change-me'),
+        
+        # 'NAME' é o nome do banco de dados específico dentro do servidor onde as tabelas serão criadas.
+        'NAME': os.getenv('POSTGRES_DB', 'change-me'),
+        
+        # 'USER' é o nome de usuário que tem permissão para acessar e modificar esse banco de dados.
+        'USER': os.getenv('POSTGRES_USER', 'change-me'),
+        
+        # 'PASSWORD' é a senha secreta de acesso para o usuário acima (crítico manter em variável de ambiente!).
+        'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'change-me'),
+        
+        # 'HOST' é o endereço do servidor onde o banco está rodando (pode ser um IP, 'localhost' ou o nome de um serviço no Docker).
+        'HOST': os.getenv('POSTGRES_HOST', 'change-me'),
+        
+        # 'PORT' é a porta de rede para se conectar ao banco (a padrão do PostgreSQL, por exemplo, é '5432').
+        'PORT': os.getenv('POSTGRES_PORT', 'change-me'),
     }
 }
 
@@ -102,9 +147,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/6.0/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'pt-br'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'America/Recife'
 
 USE_I18N = True
 
@@ -114,4 +159,25 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
-STATIC_URL = 'static/'
+# STATIC_URL é o caminho que aparecerá na barra de endereço do navegador para acessar os arquivos estáticos.
+# Exemplo: se o seu site for www.meusite.com, um arquivo CSS será acessado em www.meusite.com/static/css/estilo.css
+STATIC_URL = '/static/'
+
+# /data/web/static <- Comentário lembrando onde a pasta física ficará no servidor.
+# STATIC_ROOT é a pasta real no servidor onde o Django vai "reunir" TODOS os arquivos estáticos do projeto
+# (incluindo o CSS do painel de administração) quando você rodar o comando 'python manage.py collectstatic'.
+STATIC_ROOT = DATA_DIR / 'static'
+
+# MEDIA_URL é o caminho na URL para os arquivos de mídia (uploads dos usuários).
+# Exemplo: a foto de perfil de um usuário será acessada em www.meusite.com/media/fotos/perfil.jpg
+MEDIA_URL = '/media/'
+
+# /data/web/media <- Comentário lembrando onde a pasta física dos uploads ficará.
+# MEDIA_ROOT é a pasta real no disco do servidor onde o Django vai salvar fisicamente cada arquivo 
+# que um usuário enviar pelo site (fotos, PDFs, comprovantes, etc.).
+MEDIA_ROOT = DATA_DIR / 'media'
+
+# DEFAULT_AUTO_FIELD define o tipo de campo padrão que o Django usará para criar as chaves primárias (IDs) 
+# de tabelas novas automaticamente, caso você não defina uma chave manualmente no seu modelo (Model).
+# 'django.db.models.BigAutoField' significa que os IDs serão números inteiros de 64 bits (grandes).
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
