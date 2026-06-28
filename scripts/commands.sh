@@ -9,11 +9,10 @@ set -e
 # O "!" inverte a lógica: "Enquanto NÃO conseguir conectar no Postgres, faça..."
 while ! nc -z $POSTGRES_HOST $POSTGRES_PORT; do
   # Exibe uma mensagem amarela no terminal do Docker avisando que o banco ainda não está pronto.
-  # O "&" no final envia o comando para o background, permitindo que o script continue sem travar.
-  echo "🟡 Waiting for Postgres Database Startup ($POSTGRES_HOST $POSTGRES_PORT) ..." &
+  echo "🟡 Waiting for Postgres Database Startup ($POSTGRES_HOST $POSTGRES_PORT) ..." 
   
-  # Pausa a execução por 0.1 segundos antes de tentar a conexão novamente, evitando sobrecarregar o processador.
-  sleep 0.1
+  # Pausa a execução por 2 segundos antes de tentar a conexão novamente, evitando sobrecarregar o processador.
+  sleep 2
 done
 
 # Mensagem exibida no terminal quando o laço 'while' terminar, indicando que o Postgres aceitou a conexão.
@@ -22,8 +21,11 @@ echo "✅ Postgres Database Started Successfully ($POSTGRES_HOST:$POSTGRES_PORT)
 # Coleta todos os arquivos estáticos do Django (CSS, JS, Imagens) e os agrupa no diretório configurado em STATIC_ROOT.
 python manage.py collectstatic --noinput
 
+# Cria os arquivos de migração com base nas alterações feitas nos models do Django.
+python manage.py makemigrations --noinput
+
 # Aplica as migrações do banco de dados (cria/atualiza as tabelas de acordo com seus models do Django).
-python manage.py migrate
+python manage.py migrate --noinput
 
 # Inicia o servidor de desenvolvimento nativo do Django para começar a receber requisições.
 python manage.py runserver 0.0.0.0:8000

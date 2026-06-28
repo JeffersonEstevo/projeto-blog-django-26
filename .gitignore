@@ -165,3 +165,9 @@ notes.txt
 static/
 media/
 project/local_settings.py
+/djangoapp/static/
+/djangoapp/media/
+/djangoapp/project/local_settings.py
+gunicorn-error-log
+__localcode
+/data/
