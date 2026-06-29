@@ -8,12 +8,31 @@
   {% include 'blog/partials/_head.html' %}
 </head>
 
-<!-- Abre o corpo da página, onde fica todo o conteúdo visível para o usuário -->
 <body>
-  {# Inicia o bloco de template Django chamado 'content' para ser preenchido por outras páginas #}
-  {# Fecha o bloco de template Django chamado 'content' #}
-  {% block content %}{% endblock content %}
-<!-- Fecha a tag do corpo da página -->
+    {% comment %}
+      Injeta dinamicamente o código do arquivo '_header.html'.
+      Geralmente carrega o topo do site, incluindo a logo da marca,
+      os menus de navegação principais e a barra de pesquisa.
+    {% endcomment %}
+    {% include 'blog/partials/_header.html' %}
+
+    {# Inicia o bloco de template Django chamado 'content' para ser preenchido por outras páginas #}
+    {# Fecha o bloco de template Django chamado 'content' #}
+    {% block content %}{% endblock content %}
+
+    {% comment %}
+      Injeta dinamicamente o código do arquivo '_pagination.html'.
+      Responsável por exibir os botões de navegação por páginas
+      (como Anterior, Próxima e números de página).
+    {% endcomment %}
+    {% include 'blog/partials/_pagination.html' %}
+
+    {% comment %}
+      Injeta dinamicamente o código do arquivo '_footer.html'.
+      Carrega o rodapé padrão da página com direitos autorais,
+      redes sociais e links institucionais.
+    {% endcomment %}
+    {% include 'blog/partials/_footer.html' %}
 </body>
 
 <!-- Fecha a tag HTML principal e encerra o documento -->
