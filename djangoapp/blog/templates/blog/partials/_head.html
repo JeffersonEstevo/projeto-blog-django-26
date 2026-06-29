@@ -1,0 +1,12 @@
+{# Carrega as ferramentas de arquivos estáticos do Django, permitindo usar a tag {% static %} para mapear CSS, JS e imagens #}
+{% load static %}
+<!-- Define a codificação de caracteres UTF-8 para garantir que acentos e símbolos apareçam corretamente no navegador -->
+<meta charset="UTF-8">
+<!-- Garante a renderização e compatibilidade visual corretas no navegador Internet Explorer antigo -->
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<!-- Configura a janela de visualização (viewport) para tornar a página responsiva em celulares, tablets e computadores -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- Vincula o arquivo de estilização CSS externo, buscando-o de forma dinâmica dentro da pasta estática do app blog -->
+<link rel="stylesheet" href="{% static 'blog/css/style.css' %}">
+<!-- Define o título oficial da página que será exibido na aba do navegador do usuário -->
+<title>TESTANDO</title>

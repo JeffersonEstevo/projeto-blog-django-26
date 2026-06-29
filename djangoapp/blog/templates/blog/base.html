@@ -1,19 +1,13 @@
 <!-- Define o tipo de documento como HTML5 para o navegador -->
 <!DOCTYPE html>
-<!-- Inicia a tag HTML principal e define o idioma da página como inglês -->
-<html lang="en">
-<!-- Abre o cabeçalho, onde ficam as configurações e metadados da página -->
+<!-- Inicia a tag HTML principal e define o idioma da página como português -->
+<html lang="pt-BR">
+
 <head>
-  <!-- Define a codificação de caracteres UTF-8 para exibir acentos corretamente -->
-  <meta charset="UTF-8">  
-  <!-- Garante a compatibilidade visual com o navegador Internet Explorer antigo -->
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">  
-  <!-- Configura a responsividade para que a página se ajuste a celulares e tablets -->
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">  
-  <!-- Define o título que aparece na aba do navegador -->
-  <title>Document</title>
-<!-- Fecha a tag do cabeçalho -->
+  {# Injeta dinamicamente todo o conteúdo do arquivo '_head.html' que está localizado na pasta de parciais do blog #}
+  {% include 'blog/partials/_head.html' %}
 </head>
+
 <!-- Abre o corpo da página, onde fica todo o conteúdo visível para o usuário -->
 <body>
   {# Inicia o bloco de template Django chamado 'content' para ser preenchido por outras páginas #}
@@ -21,5 +15,6 @@
   {% block content %}{% endblock content %}
 <!-- Fecha a tag do corpo da página -->
 </body>
+
 <!-- Fecha a tag HTML principal e encerra o documento -->
 </html>
