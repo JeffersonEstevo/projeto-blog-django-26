@@ -15,7 +15,10 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+# Importa a função 'include' do Django, 
+# usada para conectar as rotas de outros aplicativos 
+# ao arquivo de rotas principal
+from django.urls import path, include
 
 # Importa o objeto 'settings', que dá acesso a todas as configurações do seu projeto (definidas em settings.py)
 from django.conf import settings
@@ -24,6 +27,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 urlpatterns = [
+    path('', include('blog.urls')),
     path('admin/', admin.site.urls),
 ]
 

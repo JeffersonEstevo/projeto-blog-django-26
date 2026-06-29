@@ -1,0 +1,8 @@
+{# Informa ao Django que este arquivo herda a estrutura visual e o código do arquivo 'base.html' localizado na pasta 'blog' #}
+{% extends 'blog/base.html' %}
+{# Abre o bloco chamado 'content', indicando onde o conteúdo específico desta página deve ser inserido no arquivo base #}
+{% block content %}  
+  <!-- Exibe um título principal na página com o texto 'Olá mundo' em destaque -->
+  <h1>Olá mundo</h1>
+{# Fecha o bloco 'content', sinalizando o fim do conteúdo específico desta página #}
+{% endblock content %}
