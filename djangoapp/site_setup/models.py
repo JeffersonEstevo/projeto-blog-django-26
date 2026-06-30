@@ -34,4 +34,49 @@ class MenuLink(models.Model):
     # ele mostrará o conteúdo do campo 'text'.
     def __str__(self):
         return self.text
+
+
+# Define a classe SiteSetup, que funcionará como a tabela de configurações gerais do seu site.
+class SiteSetup(models.Model):
+    
+    # A classe Meta define metadados e configurações visuais do modelo no Django.
+    class Meta:
+        # Define o nome do modelo no singular dentro do painel de administração.
+        verbose_name = 'Setup'
+        
+        # Define o nome no plural. Como é uma tela de configuração única (Singleton), 
+        # faz sentido manter o plural igual ao singular para não exibir "Setups".
+        verbose_name_plural = 'Setup'
+
+    # Campo de texto curto (máximo 65 caracteres) para armazenar o título principal do site/blog.
+    title = models.CharField(max_length=65)
+    
+    # Campo de texto (máximo 255 caracteres) para armazenar uma descrição ou slogan do site.
+    description = models.CharField(max_length=255)
+
+    # Chaves booleanas (True/False) para controlar dinamicamente a exibição de elementos no Front-end:
+    
+    # Define se o cabeçalho (header) deve ser exibido na tela. Padrão: Sim (True).
+    show_header = models.BooleanField(default=True)
+    
+    # Define se a barra de pesquisa deve ser exibida. Padrão: Sim (True).
+    show_search = models.BooleanField(default=True)
+    
+    # Define se o menu de navegação deve ser exibido. Padrão: Sim (True).
+    show_menu = models.BooleanField(default=True)
+    
+    # Define se o texto de descrição/slogan deve aparecer no layout. Padrão: Sim (True).
+    show_description = models.BooleanField(default=True)
+    
+    # Define se os botões de paginação (Avançar/Voltar páginas) devem aparecer. Padrão: Sim (True).
+    show_pagination = models.BooleanField(default=True)
+    
+    # Define se o rodapé (footer) do site deve ser exibido. Padrão: Sim (True).
+    show_footer = models.BooleanField(default=True)
+
+    # Método mágico que define como o objeto será representado em formato de texto.
+    # Quando o Django precisar listar essa configuração, ele mostrará o valor salvo no campo 'title'.
+    def __str__(self):
+        return self.title
+    
     
