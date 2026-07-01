@@ -28,6 +28,20 @@ class MenuLink(models.Model):
     # Por padrão (default=False), ele abrirá na mesma aba.
     new_tab = models.BooleanField(default=False)
 
+    site_setup = models.ForeignKey(
+        # Relaciona este model com o model 'SiteSetup' (pode ser uma string se o model estiver no mesmo arquivo ou para evitar importação circular)
+        'SiteSetup', 
+        # Se o objeto 'SiteSetup' relacionado for deletado, este registro também será deletado automaticamente (Cascata)
+        on_delete=models.CASCADE, 
+
+        # Permite que o campo fique vazio na validação de formulários (no painel do Django Admin, por exemplo)
+        blank=True, 
+        # Permite que o banco de dados armazene o valor como NULL caso não haja relacionamento selecionado
+        null=True, 
+        # Define que o valor padrão inicial deste campo para novos registros será None (NULL)
+        default=None,
+    )
+
     # Método mágico __str__ define a representação em texto deste objeto.
     # Quando o Django precisar exibir esse link 
     # (como na listagem do admin ou em selects), 

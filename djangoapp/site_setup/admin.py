@@ -1,22 +1,17 @@
 from django.contrib import admin
 from site_setup.models import MenuLink, SiteSetup
 
-# O decorator @admin.register vincula o modelo MenuLink a esta classe de configuração,
-# registrando-o para aparecer no painel administrativo do Django.
-@admin.register(MenuLink)
-class MenuLinkAdmin(admin.ModelAdmin):
+# ANTES: MenuLink tinha sua própria página de administração corporativa (@admin.register(MenuLink))
+# AGORA: Ele foi transformado em um Inline para ser editado DIRETAMENTE dentro da página de SiteSetup.
+class MenuLinkInline(admin.TabularInline):
+    """
+    Permite criar, editar ou excluir MenuLinks diretamente na mesma tela 
+    de edição do SiteSetup, exibidos em formato de tabela (TabularInline).
+    """
+    model = MenuLink
     
-    # Define as colunas que serão exibidas na tabela de listagem dos links.
-    list_display = 'id', 'text', 'url_or_path',
-    
-    # Define quais dessas colunas serão clicáveis para abrir a tela de edição do link.
-    # Por padrão apenas a primeira é, mas aqui todas viram atalhos para edição.
-    list_display_links = 'id', 'text', 'url_or_path',
-    
-    # Ativa uma barra de pesquisa no topo da página que permite filtrar os
-    # resultados buscando por correspondências no ID, no texto ou na URL.
-    search_fields = 'id', 'text', 'url_or_path',
-
+    # Define quantos formulários em branco para novos links aparecerão por padrão
+    extra = 1
 
 # O decorator @admin.register vincula o modelo SiteSetup a 
 # esta classe de configuração,
@@ -28,6 +23,11 @@ class SiteSetupAdmin(admin.ModelAdmin):
     # 'title' (Título) e 'description' (Descrição) 
     # serão exibidas na tabela de listagem do painel.
     list_display = 'title', 'description',
+
+    # Acopla o Inline do MenuLink aqui. 
+    # Agora, ao abrir um SiteSetup, os MenuLinks relacionados aparecerão na mesma página.
+    # É boa prática usar uma tupla/lista aqui
+    inlines = (MenuLinkInline,)  
 
     # Sobrescreve o método do Django que concede ou nega a permissão de 
     # ADICIONAR um novo registro.
