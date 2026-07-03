@@ -29,16 +29,22 @@ class MenuLink(models.Model):
     new_tab = models.BooleanField(default=False)
 
     site_setup = models.ForeignKey(
-        # Relaciona este model com o model 'SiteSetup' (pode ser uma string se o model estiver no mesmo arquivo ou para evitar importação circular)
+        # Relaciona este model com o model 'SiteSetup' 
+        # (pode ser uma string se o model estiver no mesmo 
+        # arquivo ou para evitar importação circular)
         'SiteSetup', 
-        # Se o objeto 'SiteSetup' relacionado for deletado, este registro também será deletado automaticamente (Cascata)
+        # Se o objeto 'SiteSetup' relacionado for deletado, 
+        # este registro também será deletado automaticamente (Cascata)
         on_delete=models.CASCADE, 
 
-        # Permite que o campo fique vazio na validação de formulários (no painel do Django Admin, por exemplo)
+        # Permite que o campo fique vazio na validação de formulários 
+        # (no painel do Django Admin, por exemplo)
         blank=True, 
-        # Permite que o banco de dados armazene o valor como NULL caso não haja relacionamento selecionado
+        # Permite que o banco de dados armazene o valor como NULL 
+        # caso não haja relacionamento selecionado
         null=True, 
-        # Define que o valor padrão inicial deste campo para novos registros será None (NULL)
+        # Define que o valor padrão inicial deste campo 
+        # para novos registros será None (NULL)
         default=None,
     )
 
@@ -50,46 +56,73 @@ class MenuLink(models.Model):
         return self.text
 
 
-# Define a classe SiteSetup, que funcionará como a tabela de configurações gerais do seu site.
+# Define a classe SiteSetup, 
+# que funcionará como a tabela de configurações gerais do seu site.
 class SiteSetup(models.Model):
     
-    # A classe Meta define metadados e configurações visuais do modelo no Django.
+    # A classe Meta define metadados e 
+    # configurações visuais do modelo no Django.
     class Meta:
-        # Define o nome do modelo no singular dentro do painel de administração.
+        # Define o nome do modelo no singular 
+        # dentro do painel de administração.
         verbose_name = 'Setup'
         
-        # Define o nome no plural. Como é uma tela de configuração única (Singleton), 
-        # faz sentido manter o plural igual ao singular para não exibir "Setups".
+        # Define o nome no plural. 
+        # Como é uma tela de configuração única (Singleton), 
+        # faz sentido manter o plural igual ao singular 
+        # para não exibir "Setups".
         verbose_name_plural = 'Setup'
 
-    # Campo de texto curto (máximo 65 caracteres) para armazenar o título principal do site/blog.
+    # Campo de texto curto (máximo 65 caracteres) 
+    # para armazenar o título principal do site/blog.
     title = models.CharField(max_length=65)
     
-    # Campo de texto (máximo 255 caracteres) para armazenar uma descrição ou slogan do site.
+    # Campo de texto (máximo 255 caracteres) 
+    # para armazenar uma descrição ou slogan do site.
     description = models.CharField(max_length=255)
 
-    # Chaves booleanas (True/False) para controlar dinamicamente a exibição de elementos no Front-end:
+    # Chaves booleanas (True/False) 
+    # para controlar dinamicamente a exibição de elementos no Front-end:
     
-    # Define se o cabeçalho (header) deve ser exibido na tela. Padrão: Sim (True).
+    # Define se o cabeçalho (header) 
+    # deve ser exibido na tela. Padrão: Sim (True).
     show_header = models.BooleanField(default=True)
     
-    # Define se a barra de pesquisa deve ser exibida. Padrão: Sim (True).
+    # Define se a barra de pesquisa deve ser exibida. 
+    # Padrão: Sim (True).
     show_search = models.BooleanField(default=True)
     
-    # Define se o menu de navegação deve ser exibido. Padrão: Sim (True).
+    # Define se o menu de navegação deve ser exibido. 
+    # Padrão: Sim (True).
     show_menu = models.BooleanField(default=True)
     
-    # Define se o texto de descrição/slogan deve aparecer no layout. Padrão: Sim (True).
+    # Define se o texto de descrição/slogan deve aparecer no layout. 
+    # Padrão: Sim (True).
     show_description = models.BooleanField(default=True)
     
-    # Define se os botões de paginação (Avançar/Voltar páginas) devem aparecer. Padrão: Sim (True).
+    # Define se os botões de paginação (Avançar/Voltar páginas) 
+    # devem aparecer. Padrão: Sim (True).
     show_pagination = models.BooleanField(default=True)
     
-    # Define se o rodapé (footer) do site deve ser exibido. Padrão: Sim (True).
+    # Define se o rodapé (footer) do site deve ser exibido. 
+    # Padrão: Sim (True).
     show_footer = models.BooleanField(default=True)
 
-    # Método mágico que define como o objeto será representado em formato de texto.
-    # Quando o Django precisar listar essa configuração, ele mostrará o valor salvo no campo 'title'.
+    # Define o campo para upload do favicon do site
+    favicon = models.ImageField(
+        # Organiza os arquivos em pastas por ano (%Y) e mês (%m) 
+        # dentro de 'assets/favicon/'
+        upload_to='assets/favicon/%Y/%m/',
+        
+        # Permite que o campo fique vazio no formulário do admin e 
+        # define uma string vazia como padrão caso não haja imagem
+        blank=True, default=''
+    )
+
+    # Método mágico que define como o 
+    # objeto será representado em formato de texto.
+    # Quando o Django precisar listar essa configuração, 
+    # ele mostrará o valor salvo no campo 'title'.
     def __str__(self):
         return self.title
     
