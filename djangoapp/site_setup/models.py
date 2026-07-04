@@ -1,4 +1,8 @@
 from django.db import models
+# Importa uma função personalizada para redimensionar imagens
+from utils.images import resize_image
+# Importa um validador personalizado para garantir que o arquivo seja um PNG
+from utils.model_validators import validate_png
 
 # Define a classe MenuLink, que representa uma tabela no banco de dados.
 # Ela herda de models.Model, transformando esta classe em um modelo do Django.
@@ -116,7 +120,10 @@ class SiteSetup(models.Model):
         
         # Permite que o campo fique vazio no formulário do admin e 
         # define uma string vazia como padrão caso não haja imagem
-        blank=True, default=''
+        blank=True, default='',
+        # Aplica a validação customizada para aceitar 
+        # apenas arquivos PNG no upload
+        validators=[validate_png],
     )
 
     # Método mágico que define como o 
@@ -126,4 +133,29 @@ class SiteSetup(models.Model):
     def __str__(self):
         return self.title
     
-    
+   # Sobrescrita do método save: altera o comportamento padrão do Django 
+   # ao salvar o objeto
+    def save(self, *args, **kwargs):
+        # Guarda o nome/caminho atual do arquivo de favicon 
+        # antes de salvar (convertido para string)
+        current_favicon_name = str(self.favicon.name)
+        
+        # Executa o método save original da classe pai (models.Model), 
+        # salvando os dados no banco de dados
+        super().save(*args, **kwargs)
+        
+        # Inicializa uma variável de controle para checar se o favicon mudou
+        favicon_changed = False
+
+        # Se existir um arquivo de favicon associado a este objeto...
+        if self.favicon:
+            # ...verifica se o nome gravado antes do save é diferente 
+            # do nome atual (detecta se houve novo upload)
+            favicon_changed = current_favicon_name != self.favicon.name
+
+        # Se um novo favicon foi enviado ou modificado...
+        if favicon_changed:
+            # ...chama a função para redimensionar a imagem do favicon para 
+            # o tamanho padrão de 32x32 pixels
+            resize_image(self.favicon, 32) 
+            
