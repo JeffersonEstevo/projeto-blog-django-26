@@ -9,43 +9,44 @@
 </head>
 
 <body>
-    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Asperiores 
-    et necessitatibus consectetur deserunt! Expedita iure recusandae molestias 
-    porro dicta, ipsum aspernatur, debitis culpa hic facilis deserunt 
-    reiciendis fugiat quas eius!</p>
+    <div class="blog-wrapper">
+      {% comment %}
+        Injeta dinamicamente o código do arquivo '_header.html'.
+        Geralmente carrega o topo do site, incluindo a logo da marca,
+        os menus de navegação principais e a barra de pesquisa.
+      {% endcomment %}
+      {# Verifica no banco de dados/contexto se a opção de mostrar o cabeçalho está ativa #}
+      {% if site_setup.show_header %}
+        {# O 'include' injeta o código HTML do arquivo _header.html exatamente nesta posição #}
+        {% include 'blog/partials/_header.html' %}
+      {% endif %}
 
-    <h1>Exemplo: {{ site_setup.title }}</h1>
+      {# Inicia o bloco de template Django chamado 'content' para ser preenchido por outras páginas #}
+      {# Fecha o bloco de template Django chamado 'content' #}
+      {% block content %}{% endblock content %}
 
-    {% comment %}
-      Injeta dinamicamente o código do arquivo '_header.html'.
-      Geralmente carrega o topo do site, incluindo a logo da marca,
-      os menus de navegação principais e a barra de pesquisa.
-    {% endcomment %}
-    {% include 'blog/partials/_header.html' %}
+      {% comment %}
+        Injeta dinamicamente o código do arquivo '_pagination.html'.
+        Responsável por exibir os botões de navegação por páginas
+        (como Anterior, Próxima e números de página).
+      {% endcomment %}
+      {# Verifica se a paginação (ir para página 1, 2, 3...) deve ser exibida nesta página #}
+      {% if site_setup.show_pagination %}
+        {# Injeta o componente de paginação isolado para evitar repetição de código (DRY) #}
+        {% include 'blog/partials/_pagination.html' %}
+      {% endif %}
 
-    {# Inicia o bloco de template Django chamado 'content' para ser preenchido por outras páginas #}
-    {# Fecha o bloco de template Django chamado 'content' #}
-    {% block content %}{% endblock content %}
-
-    {% comment %}
-      Injeta dinamicamente o código do arquivo '_pagination.html'.
-      Responsável por exibir os botões de navegação por páginas
-      (como Anterior, Próxima e números de página).
-    {% endcomment %}
-    {% include 'blog/partials/_pagination.html' %}
-
-    {% comment %}
-      Injeta dinamicamente o código do arquivo '_footer.html'.
-      Carrega o rodapé padrão da página com direitos autorais,
-      redes sociais e links institucionais.
-    {% endcomment %}
-    {% include 'blog/partials/_footer.html' %}
-
-
-    {% comment %}
-      Arquivo criado temporariamente para testes do css
-    {% endcomment %} 
-    {% include 'blog/partials/_temp.html' %}
+      {% comment %}
+        Injeta dinamicamente o código do arquivo '_footer.html'.
+        Carrega o rodapé padrão da página com direitos autorais,
+        redes sociais e links institucionais.
+      {% endcomment %}
+      {# Verifica se o rodapé do site está habilitado nas configurações globais #}
+      {% if site_setup.show_footer %}
+        {# Injeta o conteúdo do rodapé do site #}
+        {% include 'blog/partials/_footer.html' %}
+      {% endif %}
+    </div>
 </body>
 
 <!-- Fecha a tag HTML principal e encerra o documento -->

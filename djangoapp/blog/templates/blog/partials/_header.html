@@ -1,1 +1,73 @@
-<h1>HEADER</h1>
+{# Tag semântica que define o cabeçalho da página e seus containers de estilo/alinhamento #}
+<header class="header section-wrapper">
+   <div class="section-content-wide">
+      <div class="section-gap">
+         
+         {# Título principal do blog centralizado. O link aponta para a página inicial ('/') #}
+         <h1 class="blog-title center pb-base">
+            <a class="blog-link" href="/">{{ site_setup.title }}</a>
+         </h1>
+         
+         {# Verifica no painel administrativo se a descrição do blog deve ser exibida #}
+         {% if site_setup.show_description %}
+            <p class="blog-description pb-base center">{{ site_setup.description }}</p>
+         {% endif %}
+
+         {# Verifica se a barra de pesquisa global está habilitada nas configurações #}
+         {% if site_setup.show_search %}
+         <div class="search pb-base center">
+            {# Formulário de busca utilizando o método GET para passar o termo digitado via URL #}
+            <form class="search-form" action="#" method="get">
+               <div class="search-content">
+                  {# Label invisível visualmente (sr-only), usada apenas por leitores de tela para acessibilidade #}
+                  <label class="sr-only" id="search-label" for="search-input">Search</label>
+                  
+                  {# Campo de entrada de texto da busca #}
+                  <input
+                     class="search-input"
+                     type="search"
+                     name="search"
+                     id="search-input"
+                     placeholder="Search"
+                     value="Non risu potius quam oratione eiciendum? Quo pleb "
+                     >
+                  
+                  {# Botão de envio que utiliza a diretiva aria-labelledby para associar o botão ao label oculto #}
+                  <button class="search-btn" type="submit" aria-labelledby="search-label">
+                     {# Ícone de lupa do Font Awesome #}
+                     <i class="fa fa-search"></i>
+                  </button>
+               </div>
+            </form>
+         </div>
+         {% endif %}
+         
+         {# Verifica se o menu de navegação está ativo no painel administrativo #}
+         {% if site_setup.show_menu %}
+         <nav class="menu">
+            <ul class="menu-items">
+               {# Faz um loop buscando todos os links de menu associados a este site_setup via relacionamento reverso (ForeignKey) #}
+               {% for link in site_setup.menulink_set.all %}
+               <li class="menu-item">
+                  
+                  {# Se o link foi configurado para abrir em uma nova aba, adiciona o atributo target="_blank" #}
+                  {% if link.new_tab %}
+                  <a target="_blank" class="menu-link" href="{{ link.url_or_path }}">
+                     {{ link.text }}
+                  </a>
+                  {% else %}
+                  {# Caso contrário, abre o link na mesma aba normalmente #}
+                  <a class="menu-link" href="{{ link.url_or_path }}">
+                     {{ link.text }}
+                  </a>
+                  {% endif %}
+                  
+               </li>
+               {% endfor %}
+            </ul>
+         </nav>
+         {% endif %}
+         
+      </div>
+   </div>
+</header>

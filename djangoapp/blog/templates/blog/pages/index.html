@@ -1,8 +1,28 @@
-{# Informa ao Django que este arquivo herda a estrutura visual e o código do arquivo 'base.html' localizado na pasta 'blog' #}
 {% extends 'blog/base.html' %}
-{# Abre o bloco chamado 'content', indicando onde o conteúdo específico desta página deve ser inserido no arquivo base #}
-{% block content %}  
-  <!-- Exibe um título principal na página com o texto 'Olá mundo' em destaque -->
-  <h1>Olá mundo</h1>
-{# Fecha o bloco 'content', sinalizando o fim do conteúdo específico desta página #}
+{# Herda toda a estrutura esqueleto (HTML, head, body, header, footer) do arquivo base.html #}
+
+{# Preenche o bloco dinâmico chamado 'content' que foi definido no arquivo base.html #}
+{% block content %}
+  {# Tag semântica para indicar o conteúdo principal desta página específica #}
+  <main class="main-content section-wrapper">
+    <div class="section-content-wide">
+      <div class="section-gap">
+
+        {# Container estilizado (geralmente via CSS Grid) para organizar os cartões de posts de forma alinhada #}
+        <div class="card-grid">
+          
+          {# Um truque inteligente do Django para fazer o loop rodar exatamente 9 vezes (preenchendo uma string com 9 espaços) #}
+          {# Isso simula 9 repetições na tela antes de você conectar com os posts reais do banco de dados #}
+          {% for i in ""|ljust:"9" %}
+            
+            {# Inclui o componente visual de um cartão de post isolado (_post-card.html) #}
+            {# A diretiva 'with i=forloop.counter0' passa o índice atual do loop (de 0 a 8) para dentro do card #}
+            {% include 'blog/partials/_post-card.html' with i=forloop.counter0 %}
+            
+          {% endfor %}
+        </div>
+
+      </div>
+    </div>
+  </main>
 {% endblock content %}

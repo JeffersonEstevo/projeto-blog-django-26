@@ -1,1 +1,61 @@
-<h1>PAGINATION</h1>
+{# Só exibe a estrutura se o objeto da página existir e se houver mais de uma página no total #}
+{% if page_obj and page_obj.has_other_pages %}
+
+{# Linha divisória visual para separar o conteúdo do rodapé/paginação #}
+<div class="separator"></div>
+
+{# Containers de estilização e alinhamento do bloco de paginação #}
+<div class="pagination-wrapper section-wrapper">
+  <div class="pagination-content section-content-wide">
+    <div class="pagination-gap section-gap">
+
+      {# Tag semântica de navegação com rótulo de acessibilidade para leitores de tela #}
+      <nav class="pagination-links" aria-label="Pagination">
+        <span class="step-links">
+            
+            {# Se existir uma página anterior, exibe os botões de voltar #}
+            {% if page_obj.has_previous %}
+              {# Link para ir direto para a primeira página (?page=1). Mantém o termo de busca caso exista #}
+              <a title="Page 1" aria-label="Page 1" href="?page=1{{ search_url }}">
+                  <i class="fa-solid fa-backward-fast"></i>
+              </a>
+              {# Link dinâmico para ir para a página imediatamente anterior #}
+              <a title="Page {{ page_obj.previous_page_number }}" aria-label="Page {{ page_obj.previous_page_number }}" href="?page={{ page_obj.previous_page_number }}{{ search_url }}">
+                <i class="fa-solid fa-circle-chevron-left"></i>
+              </a>
+            {% else %}
+              {# Se NÃO existir página anterior (está na pág 1), mostra um ícone neutro indicando topo/início #}
+              <span title="Current page" aria-current="page">
+                <i class="fa-solid fa-circle-chevron-up"></i>
+              </span>          
+            {% endif %}
+
+            {# Exibe graficamente a página atual em relação ao total (Ex: 2 / 10) #}
+            <span class="current" title="Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}" aria-current="page">
+              {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}
+            </span>
+
+            {# Se existir uma próxima página, exibe os botões de avançar #}
+            {% if page_obj.has_next %}
+              {# Link dinâmico para ir para a página imediatamente posterior #}
+              <a title="Page {{ page_obj.next_page_number }}" aria-label="Page {{ page_obj.next_page_number }}" href="?page={{ page_obj.next_page_number }}{{ search_url }}">
+                <i class="fa-solid fa-circle-chevron-right"></i>
+              </a>
+              {# Link dinâmico para ir direto para a última página disponível #}
+              <a title="Page {{ page_obj.paginator.num_pages }}" aria-label="Page {{ page_obj.paginator.num_pages }}" href="?page={{ page_obj.paginator.num_pages }}{{ search_url }}">
+                <i class="fa-solid fa-forward-fast"></i>
+              </a>
+            {% else %}
+              {# Se NÃO existir próxima página (chegou ao fim), mostra o ícone neutro indicando fim #}
+              <span title="Current page" aria-current="page">
+                <i class="fa-solid fa-circle-chevron-up"></i>
+              </span>          
+            {% endif %}
+        </span>
+      </nav>
+      
+    </div>
+  </div>
+</div>
+
+{% endif %}

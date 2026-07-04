@@ -1,1 +1,15 @@
-<h1>FOOTER</h1>
+{# Tag semântica que envolve e define toda a seção de rodapé da página, aplicando estilos globais de wrapper #}
+<footer class="footer section-wrapper">
+    {# Div principal que define o container do rodapé, geralmente com uma largura maior/total (wide) #}
+    <div class="section-content-wide">
+        {# Div auxiliar para criar um espaçamento (gap/margin/padding) interno ou externo padronizado #}
+        <div class="section-gap">
+            {# Classe utilitária para centralizar o texto do rodapé na tela #}
+            <div class="center">
+                {# O {% now "Y" %} gera o ano atual de quatro dígitos automaticamente (ex: 2026). #}
+                {# O {{ site_setup.title }} busca dinamicamente o título do site configurado no banco de dados. #}
+                © {% now "Y" %} {{ site_setup.title }} - Todos os direitos reservados.
+            </div>
+        </div>
+    </div>
+</footer>
