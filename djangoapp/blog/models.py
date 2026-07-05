@@ -40,6 +40,10 @@ class Tag(models.Model):
         # (models.Model) para efetivar a gravação no banco
         return super().save(*args, **kwargs)
 
+    # Define a representação em texto da Tag.
+    # Faz com que ela apareça pelo próprio nome (self.name) no painel admin.
+    def __str__(self) -> str:
+        return self.name
 
 # Define a tabela 'Category' no banco de dados
 class Category(models.Model):
@@ -65,3 +69,49 @@ class Category(models.Model):
             self.slug = slugify_new(self.name, 4)
         # Salva as alterações definitivamente no banco de dados
         return super().save(*args, **kwargs)
+
+    # Define a representação em texto da Categoria.
+    # Faz com que ela apareça pelo próprio nome (self.name) no painel admin.
+    def __str__(self) -> str:
+        return self.name
+
+# Define o modelo (tabela no banco de dados) chamado 'Page'
+class Page(models.Model):
+    # Campo de texto curto para o título da página, com limite de 65 caracteres
+    title = models.CharField(max_length=65,)
+    
+    # Campo para a URL amigável (slug). É único no banco, não pode ser nulo, 
+    # aceita ficar em branco no formulário (blank=True) e tem máximo de 255 caracteres
+    slug = models.SlugField(
+        unique=True, default="",
+        null=False, blank=True, max_length=255
+    )
+    
+    # Campo do tipo verdadeiro/falso (checkbox). Começa como falso por padrão
+    # e exibe um texto de ajuda explicativo no painel de administração
+    is_published = models.BooleanField(
+        default=False,
+        help_text=(
+            'Este campo precisará estar marcado '
+            'para a página ser exibida publicamente.'
+        ),
+    )
+    
+    # Campo de texto longo para o conteúdo principal da página (sem limite de caracteres)
+    content = models.TextField()
+
+    # Sobrescreve o método padrão de salvamento do Django
+    def save(self, *args, **kwargs):
+        # Verifica se o slug está vazio. Se estiver, gera um slug automaticamente 
+        # usando uma função personalizada (slugify_new) baseada no título da página
+        if not self.slug:
+            self.slug = slugify_new(self.title, 4)
+            
+        # Chama o método save() original da classe mãe (Django) para gravar os dados de fato no banco
+        return super().save(*args, **kwargs)
+
+    # Define a representação em texto do modelo 'Page'. 
+    # Fará com que a página apareça com o seu próprio 'title' listado no painel admin
+    def __str__(self) -> str:
+        return self.title
+    

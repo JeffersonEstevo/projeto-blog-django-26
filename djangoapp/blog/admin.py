@@ -1,8 +1,8 @@
 # Importa o módulo admin do Django para permitir a customização do painel
 from django.contrib import admin
-# Importa os modelos Category e Tag criados no arquivo models.py do seu app blog
-from blog.models import Category, Tag
-
+# Importa os modelos Category, Tag e Page
+#  criados no arquivo models.py do seu app blog
+from blog.models import Category, Tag, Page
 
 # O decorator @admin.register vincula a classe TagAdmin 
 # diretamente ao modelo Tag,
@@ -57,4 +57,42 @@ class CategoryAdmin(admin.ModelAdmin):
     # Preenche o slug da categoria automaticamente com base no nome digitado.
     prepopulated_fields = {
         "slug": ('name',),
+    }
+
+# O @admin.register vincula o modelo 'Page' a 
+# esta classe de configuração no painel administrativo
+@admin.register(Page)
+class PageAdmin(admin.ModelAdmin):
+    
+    # Define quais campos (colunas) serão exibidos 
+    # na tabela de listagem do painel
+    list_display = 'id', 'title', 'is_published',
+    
+    # Define que o campo 'title' será um link clicável 
+    # para abrir a tela de edição do registro
+    list_display_links = 'title',
+    
+    # Cria uma barra de pesquisa que busca termos digitados 
+    # dentro dos campos informados
+    search_fields = 'id', 'slug', 'title', 'content',
+    
+    # Limita a exibição da listagem a 50 registros por página (cria paginação)
+    list_per_page = 50
+    
+    # Adiciona um painel lateral de filtros baseados 
+    # no campo 'is_published' (ex: Filtrar por Sim ou Não)
+    list_filter = 'is_published',
+    
+    # Permite editar o campo 'is_published' com um clique diretamente 
+    # na tabela de listagem, sem precisar abrir o registro
+    list_editable = 'is_published',
+    
+    # Define a ordenação padrão dos registros. O '-' 
+    # indica ordem decrescente (do maior ID para o menor)
+    ordering = '-id',
+    
+    # Preenche o campo 'slug' automaticamente via JavaScript 
+    # no navegador enquanto você digita o campo 'title'
+    prepopulated_fields = {
+        "slug": ('title',),
     }
