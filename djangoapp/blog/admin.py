@@ -1,8 +1,8 @@
 # Importa o módulo admin do Django para permitir a customização do painel
 from django.contrib import admin
-# Importa os modelos Category, Tag e Page
+# Importa os modelos Category, Tag, Page e Post
 #  criados no arquivo models.py do seu app blog
-from blog.models import Category, Tag, Page
+from blog.models import Category, Tag, Page, Post
 
 # O decorator @admin.register vincula a classe TagAdmin 
 # diretamente ao modelo Tag,
@@ -96,3 +96,53 @@ class PageAdmin(admin.ModelAdmin):
     prepopulated_fields = {
         "slug": ('title',),
     }
+
+# O decorador vincula o modelo 'Post' a esta classe de configuração 
+# personalizada no admin
+@admin.register(Post)
+class PostAdmin(admin.ModelAdmin):
+    
+    # Define as colunas que serão exibidas na tabela de listagem dos posts
+    list_display = 'id', 'title', 'is_published', 'created_by',
+    
+    # Transforma o campo 'title' em um link clicável para abrir 
+    # o formulário de edição do post
+    list_display_links = 'title',
+    
+    # Cria uma barra de pesquisa capaz de buscar termos 
+    # dentro desses campos específicos
+    search_fields = 'id', 'slug', 'title', 'excerpt', 'content',
+    
+    # Limita a listagem a no máximo 50 posts por página, 
+    # criando uma paginação automática
+    list_per_page = 50
+    
+    # Adiciona um painel lateral de filtros para segmentar os posts 
+    # por 'category' e por status 'is_published'
+    list_filter = 'category', 'is_published',
+    
+    # Permite ativar/desativar a publicação (is_published) 
+    # com um clique direto na tabela de listagem
+    list_editable = 'is_published',
+    
+    # Define a ordenação padrão dos posts na lista. O '-' 
+    # indica ordem decrescente (do ID mais novo para o mais antigo)
+    ordering = '-id',
+    
+    # Define campos que serão apenas para leitura, 
+    # impedindo que o usuário os altere manualmente no formulário
+    readonly_fields = 'created_at', 'updated_at', 'created_by', 'updated_by',
+    
+    # Preenche o campo 'slug' de forma automática via JavaScript 
+    # enquanto você digita o 'title' no formulário
+    prepopulated_fields = {
+        "slug": ('title',),
+    }
+    
+    # Transforma os campos de relacionamento 
+    # (Chave Estrangeira/Many-to-Many) em caixas de busca assíncronas.
+    # Evita o travamento da página caso você tenha 
+    # milhares de tags ou categorias cadastradas.
+    # Nota: Para funcionar, os admins de 'Tag' e 'Category' 
+    # precisam ter o 'search_fields' configurado.
+    autocomplete_fields = 'tags', 'category',

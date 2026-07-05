@@ -46,8 +46,18 @@
          {% if site_setup.show_menu %}
          <nav class="menu">
             <ul class="menu-items">
-               {# Faz um loop buscando todos os links de menu associados a este site_setup via relacionamento reverso (ForeignKey) #}
-               {% for link in site_setup.menulink_set.all %}
+               {% comment %} 
+                  Aqui você estava usando o comportamento padrão do Django para buscar registros relacionados.
+                  O '_set.all' (Reverse Relation) faz uma busca automática no banco de dados para trazer 
+                  todos os objetos do modelo 'MenuLink' que apontam (via ForeignKey) para este 'site_setup'.
+               {% endcomment %}
+               {% comment %} 
+                  Aqui você substituiu o padrão do Django por um nome customizado ('menu').
+                  Isso deixa o código do template muito mais limpo, intuitivo e fácil de ler.
+                  Para que isso funcione, foi definido um 'related_name="menu"' na ForeignKey 
+                  do modelo MenuLink, ou 'menu' é um campo ManyToManyLink direto no modelo SiteSetup.
+               {% endcomment %}
+               {% for link in site_setup.menu.all %}
                <li class="menu-item">
                   
                   {# Se o link foi configurado para abrir em uma nova aba, adiciona o atributo target="_blank" #}

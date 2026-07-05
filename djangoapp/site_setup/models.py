@@ -49,7 +49,16 @@ class MenuLink(models.Model):
         null=True, 
         # Define que o valor padrão inicial deste campo 
         # para novos registros será None (NULL)
-        default=None,
+        # Sem o related_name, o Django usa o padrão dele para a relação reversa.
+        # Se este campo estiver no modelo 'MenuLink' apontando para 'SiteSetup', 
+        # para buscar os links de um site você era obrigado a usar: 
+        # site_setup.menulink_set.all()
+        # Ao adicionar o related_name='menu', 
+        # você batiza a relação reversa com um nome personalizado.
+        # Agora, o Django ignora o sufixo padrão '_set' e permite que você acesse 
+        # todos os links vinculados a este SiteSetup usando apenas: 
+        # site_setup.menu.all()
+        default=None, related_name='menu'
     )
 
     # Método mágico __str__ define a representação em texto deste objeto.
