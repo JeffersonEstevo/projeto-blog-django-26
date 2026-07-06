@@ -232,24 +232,29 @@ class Post(models.Model):
         if not self.slug:
             self.slug = slugify_new(self.title, 4)
             
-        # Guarda o nome atual do arquivo de imagem (da capa) antes de qualquer alteração ser salva
+        # Guarda o nome atual do arquivo de imagem (da capa) 
+        # antes de qualquer alteração ser salva
         current_cover_name = str(self.cover.name)
 
-        # Executa o método save original do Django para salvar os dados atuais no banco de dados
+        # Executa o método save original do Django para 
+        # salvar os dados atuais no banco de dados
         super_save = super().save(*args, **kwargs)
 
-        # Inicializa uma variável de controle (flag) definindo que a capa NÃO mudou por padrão
+        # Inicializa uma variável de controle (flag) 
+        # definindo que a capa NÃO mudou por padrão
         cover_changed = False
 
         # Verifica se o objeto possui um arquivo de capa associado
         if self.cover:
             # Compara o nome antigo (guardado antes) com o nome atual. 
-            # Se forem diferentes, significa que o usuário fez upload de uma nova imagem.
+            # Se forem diferentes, significa que o usuário 
+            # fez upload de uma nova imagem.
             cover_changed = current_cover_name != self.cover.name
 
         # Se a imagem foi alterada ou adicionada agora...
         if cover_changed:
-            # Redimensiona a nova imagem para a largura de 900px, ativa o crop/otimização (True) e define a qualidade em 70%
+            # Redimensiona a nova imagem para a largura de 900px, 
+            # ativa o crop/otimização (True) e define a qualidade em 70%
             resize_image(self.cover, 900, True, 70)
 
         # Retorna o resultado do salvamento padrão que foi executado lá atrás
