@@ -235,9 +235,6 @@ class Post(models.Model):
         # Guarda o nome atual do arquivo de imagem (da capa) antes de qualquer alteração ser salva
         current_cover_name = str(self.cover.name)
 
-        # Executa o método save original do Django para salvar os dados atuais no banco de dados
-        super_save = super().save(*args, **kwargs)
-
         # Inicializa uma variável de controle (flag) definindo que a capa NÃO mudou por padrão
         cover_changed = False
 
