@@ -146,3 +146,18 @@ class PostAdmin(admin.ModelAdmin):
     # Nota: Para funcionar, os admins de 'Tag' e 'Category' 
     # precisam ter o 'search_fields' configurado.
     autocomplete_fields = 'tags', 'category',
+
+def save_model(self, request, obj, form, change):
+    # O Django passa o booleano 'change' como True se 
+    # o objeto já existe (está sendo editado)
+    # ou False se o objeto está sendo criado do zero.
+    if change:
+        # Se o objeto já existia, define o usuário atual 
+        # como o responsável pela atualização
+        obj.updated_by = request.user  # type: ignore
+    else:
+        # Se for um novo registro, define o usuário atual como o criador
+        obj.created_by = request.user  # type: ignore
+
+    # Salva efetivamente as alterações no banco de dados
+    obj.save()
