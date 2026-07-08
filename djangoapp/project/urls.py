@@ -20,26 +20,32 @@ from django.contrib import admin
 # ao arquivo de rotas principal
 from django.urls import path, include
 
-# Importa o objeto 'settings', que dá acesso a todas as configurações do seu projeto (definidas em settings.py)
+# Importa o objeto 'settings', que dá acesso a todas as configurações 
+# do seu projeto (definidas em settings.py)
 from django.conf import settings
 
-# Importa a função helper 'static', que auxilia na criação de rotas para servir arquivos estáticos/mídia
+# Importa a função helper 'static', que auxilia na criação de rotas 
+# para servir arquivos estáticos/mídia
 from django.conf.urls.static import static
 
 urlpatterns = [
     path('', include('blog.urls')),
+    path('summernote/', include('django_summernote.urls')),
     path('admin/', admin.site.urls),
 ]
 
 # Verifica se o modo de depuração (DEBUG) está ativado no seu settings.py.
-# Isso é crucial porque o Django NÃO é eficiente (e nem seguro) servindo arquivos de mídia em produção.
+# Isso é crucial porque o Django NÃO é eficiente (e nem seguro) 
+# servindo arquivos de mídia em produção.
 if settings.DEBUG:
     
     # Concatena (adiciona) uma nova rota à sua lista existente de 'urlpatterns'
     urlpatterns += static(
-        # O primeiro argumento é a URL base que o usuário vai acessar no navegador (ex: '/media/')
+        # O primeiro argumento é a URL base que 
+        # o usuário vai acessar no navegador (ex: '/media/')
         settings.MEDIA_URL,
         
-        # O segundo argumento indica o caminho físico no seu computador/servidor onde esses arquivos estão salvos
+        # O segundo argumento indica o caminho físico 
+        # no seu computador/servidor onde esses arquivos estão salvos
         document_root=settings.MEDIA_ROOT
     )

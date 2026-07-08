@@ -68,6 +68,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'blog',
     'site_setup',
+    # Summernote
+    'django_summernote',
 ]
 
 MIDDLEWARE = [
@@ -185,3 +187,59 @@ MEDIA_ROOT = DATA_DIR / 'media'
 # de tabelas novas automaticamente, caso você não defina uma chave manualmente no seu modelo (Model).
 # 'django.db.models.BigAutoField' significa que os IDs serão números inteiros de 64 bits (grandes).
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Dicionário de configuração global para o pacote django-summernote
+SUMMERNOTE_CONFIG = {
+    
+    # Configurações nativas da biblioteca JavaScript Summernote
+    'summernote': {
+        
+        # Customização da barra de ferramentas (toolbar) do editor.
+        # Cada lista interna representa um grupo de botões visualmente unidos.
+        'toolbar': [
+            # Grupo 'style': Permite aplicar estilos de texto pré-definidos (Ex: Título 1, Título 2, Normal)
+            ['style', ['style', ]],
+            
+            # Grupo 'font': Controles básicos de fonte: Negrito (bold), Itálico (italic) e Limpar Formatação (clear)
+            ['font', ['bold', 'italic', 'clear']],
+            
+            # Grupo 'color': Permite alterar a cor do texto e a cor do fundo do texto
+            ['color', ['color']],
+            
+            # Grupo 'para': Formatação de parágrafos: Lista com marcadores (ul), Lista numerada (ol), Alinhamento (paragraph) e Linha horizontal (hr)
+            ['para', ['ul', 'ol', 'paragraph', 'hr', ]],
+            
+            # Grupo 'table': Atalho rápido para desenhar e inserir tabelas organizadas em colunas e linhas
+            ['table', ['table']],
+            
+            # Grupo 'insert': Permite injetar hiperlinks externos e enviar/escolher imagens (pictures)
+            ['insert', ['link', 'picture']],
+            
+            # Grupo 'view': Ferramentas utilitárias: Tela cheia (fullscreen), Visualizar código HTML (codeview), Desfazer (undo) e Refazer (redo)
+            ['view', ['fullscreen', 'codeview', 'undo', 'redo']],
+        ],
+        
+        # Configuração do CodeMirror (o editor de código que roda quando você clica em 'codeview')
+        'codemirror': {
+            'mode': 'htmlmixed',       # Define o realce de sintaxe híbrido (HTML, CSS e JavaScript juntos)
+            'lineNumbers': 'true',     # Exibe os números das linhas no canto esquerdo ao editar o HTML
+            'lineWrapping': 'true',    # Quebra as linhas longas automaticamente para não criar barra de rolagem horizontal no código
+            'theme': 'dracula',        # Aplica o famoso tema escuro 'Dracula' no editor de código fonte
+        },
+    },
+    
+    # Carrega arquivos CSS externos necessários. 
+    # Aqui, importa o arquivo de estilos do tema Dracula direto de um servidor CDN para que o CodeMirror consiga renderizá-lo.
+    'css': (
+        '//cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/theme/dracula.min.css',
+    ),
+    
+    # Define o limite máximo de tamanho de arquivo permitido para uploads (imagens, PDF, etc.).
+    # A conta matemática resulta em exatamente 30 Megabytes (30 * 1024 KB * 1024 Bytes).
+    'attachment_filesize_limit': 30 * 1024 * 1024,
+    
+    # Aponta para o modelo customizado de anexo que você criou (no app 'blog', modelo 'PostAttachment').
+    # Isso faz o Summernote usar a sua lógica personalizada de salvamento e redimensionamento de imagem!
+    'attachment_model': 'blog.PostAttachment',
+}
+

@@ -8,6 +8,50 @@ from utils.rands import slugify_new
 from django.contrib.auth.models import User
 # Importa a função utilitária responsável por redimensionar e otimizar imagens
 from utils.images import resize_image
+# Importa a classe abstrata de anexos do Django Summernote.
+# Ela já vem com a estrutura padrão para gerenciar os uploads 
+# feitos dentro do editor (como imagens e arquivos).
+from django_summernote.models import AbstractAttachment
+
+# Cria uma classe/modelo personalizado chamado 'PostAttachment' para gerenciar os arquivos anexados (uploads).
+# Herdando de 'AbstractAttachment', ela adquire toda a lógica de anexos nativa do Django Summernote.
+class PostAttachment(AbstractAttachment):
+    
+    # Sobrescreve o método 'save' padrão do Django. 
+    # Isso permite interceptar o fluxo para rodar regras personalizadas antes e depois de salvar o anexo.
+    def save(self, *args, **kwargs):
+        
+        # Regra de Fallback: Se o usuário/sistema não definiu um nome textual ('name') para o anexo,
+        # define automaticamente usando o nome físico do arquivo que foi upado ('file.name').
+        if not self.name:
+            self.name = self.file.name
+
+        # Converte o caminho/nome atual do arquivo para string e guarda na variável 'current_file_name'.
+        # Isso serve como um "print" do estado do arquivo antes que o banco de dados processe o upload.
+        current_file_name = str(self.file.name)
+        
+        # Executa o método de salvamento da classe pai (AbstractAttachment/Model) para registrar o objeto no banco.
+        # Guarda o retorno desse processo (que geralmente é o próprio objeto salvo) na variável 'super_save'.
+        super_save = super().save(*args, **kwargs)
+        
+        # Inicializa um sinalizador (flag) como False. Ele será usado para identificar se o arquivo sofreu alterações.
+        file_changed = False
+
+        # Verifica se o objeto de fato possui um arquivo válido associado.
+        if self.file:
+            # Compara o nome que guardamos lá no início com o nome do arquivo atual pós-salvamento.
+            # O Django faz isso porque, se você subir um arquivo com o nome 'foto.jpg' e ele já existir no servidor, 
+            # o Django o renomeará automaticamente para algo como 'foto_xyz.jpg'. Se os nomes forem diferentes, 'file_changed' vira True.
+            file_changed = current_file_name != self.file.name
+
+        # Se o gatilho 'file_changed' foi ativado (ou seja, se é um arquivo novo ou modificado pelo storage)...
+        if file_changed:
+            # ...chama a função utilitária para redimensionar a imagem física no servidor.
+            # Define a largura máxima para 900px, otimiza o arquivo (True) e reduz a qualidade para 70% para economizar espaço.
+            resize_image(self.file, 900, True, 70)
+
+        # Retorna o resultado do salvamento original, concluindo o ciclo do método 'save' com sucesso.
+        return super_save
 
 # Define a tabela 'Tag' no banco de dados
 class Tag(models.Model):

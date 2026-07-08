@@ -4,6 +4,11 @@ from django.contrib import admin
 #  criados no arquivo models.py do seu app blog
 from blog.models import Category, Tag, Page, Post
 
+# Importa o 'SummernoteModelAdmin' do pacote django_summernote.
+# Esse componente substitui o campo de texto padrão do Django Admin por um editor de texto 
+# rico (WYSIWYG), permitindo formatar texto, inserir imagens, links, etc.
+from django_summernote.admin import SummernoteModelAdmin
+
 # O decorator @admin.register vincula a classe TagAdmin 
 # diretamente ao modelo Tag,
 # dizendo ao Django que esta classe controlará 
@@ -62,8 +67,19 @@ class CategoryAdmin(admin.ModelAdmin):
 # O @admin.register vincula o modelo 'Page' a 
 # esta classe de configuração no painel administrativo
 @admin.register(Page)
-class PageAdmin(admin.ModelAdmin):
-    
+# Cria uma classe de configuração do Admin para o modelo 'Page' (Página).
+# Ao herdar de 'SummernoteModelAdmin', 
+# todos os campos de texto longo (TextField) 
+# deste modelo passarão a usar o editor Summernote no painel de administração.
+class PageAdmin(SummernoteModelAdmin):
+    # Define quais campos do modelo devem 
+    # utilizar o editor rico do Summernote.
+    # Neste caso, apenas o campo chamado 'content' (conteúdo) 
+    # receberá o editor visual;
+    # os demais campos de texto (se houver) continuarão 
+    # com o visual padrão do Django.
+    summernote_fields = ('content',)
+
     # Define quais campos (colunas) serão exibidos 
     # na tabela de listagem do painel
     list_display = 'id', 'title', 'is_published',
@@ -100,7 +116,17 @@ class PageAdmin(admin.ModelAdmin):
 # O decorador vincula o modelo 'Post' a esta classe de configuração 
 # personalizada no admin
 @admin.register(Post)
-class PostAdmin(admin.ModelAdmin):
+# Cria uma classe de configuração do Admin para o modelo 'Post' (Postagem).
+# Assim como na classe anterior, isso habilita o editor rico para 
+# os campos de texto do modelo 'Post'.
+class PostAdmin(SummernoteModelAdmin):
+    # Define quais campos do modelo devem 
+    # utilizar o editor rico do Summernote.
+    # Neste caso, apenas o campo chamado 'content' (conteúdo) 
+    # receberá o editor visual;
+    # os demais campos de texto (se houver) continuarão 
+    # com o visual padrão do Django.
+    summernote_fields = ('content',)
     
     # Define as colunas que serão exibidas na tabela de listagem dos posts
     list_display = 'id', 'title', 'is_published', 'created_by',
