@@ -1,20 +1,22 @@
 {# Tag semântica 'article' indica que este bloco representa um conteúdo independente e completo (um post do blog) #}
 <article class="card">
   
-  {# Container que envolve e limita as proporções da imagem de capa do card #}
-  <div class="card-cover-wrapper">
-    {# Link que envolve a imagem para permitir que o usuário clique na foto para abrir o post #}
-    <a href="#" class="card-cover-link">
-      {# Elemento de imagem configurado com 'loading="lazy"' para otimizar a performance (só carrega quando entra na tela) #}
-      {# O src utiliza o serviço Picsum com a variável '{{ i }}' anexada ao final para garantir que cada card gere uma imagem aleatória diferente no loop #}
-      <img 
-        class="card-cover"
-        loading="lazy"
-        src="https://picsum.photos/745/419/?rand=2{{ i }}" 
-        alt="Change me"
-      >
-    </a>
-  </div>
+  {% if post.cover %}
+    {# Container que envolve e limita as proporções da imagem de capa do card #}
+    <div class="card-cover-wrapper">
+      {# Link que envolve a imagem para permitir que o usuário clique na foto para abrir o post #}
+      <a href="{% url 'blog:post' post.slug %}" class="card-cover-link">
+        {# Elemento de imagem configurado com 'loading="lazy"' para otimizar a performance (só carrega quando entra na tela) #}
+        {# O src utiliza o serviço Picsum com a variável '{{ i }}' anexada ao final para garantir que cada card gere uma imagem aleatória diferente no loop #}
+        <img 
+          class="card-cover"
+          loading="lazy"
+          src="{{ post.cover.url }}" 
+          alt="Cover do post {{ post.title }}"
+        >
+      </a>
+    </div>
+  {% endif %}
 
   {# Container para agrupar e organizar todos os textos e links do cartão #}
   <div class="card-text-wrapper">
@@ -24,8 +26,8 @@
       {# Tag h2 usada para o título do card, mantendo a hierarquia correta já que o h1 está no cabeçalho da página #}
       <h2 class="card-title">
         {# Link do título que levará o leitor até a página completa do artigo #}
-        <a href="#" class="card-title-link">
-          Lorem ipsum dolor sit amet.
+        <a href="{% url 'blog:post' post.slug %}" class="card-title-link">
+          {{ post.title }}
         </a>
       </h2>
     </div>
@@ -34,13 +36,13 @@
     <div class="card-content-wrapper">
       {# Parágrafo com o texto de introdução ou um trecho resumido (snippet) do artigo #}
       <p class="card-content">
-        Lorem ipsum dolor sit amet consectetur adipisicing elit. Consectetur nulla omnis, maiores tempore pariatur a obcaecati atque deserunt reiciendis quam! 
+        {{ post.excerpt }} 
       </p>
 
       {# Rodapé interno do card reservado para botões e interações (curtidas, compartilhamentos ou 'leia mais') #}
       <div class="card-actions">
         {# Link explícito de chamada para ação (Call to Action) incentivando o clique #}
-        <a class="card-action-link" href="#">
+        <a class="card-action-link" href="{% url 'blog:post' post.slug %}">
           <span>Read</span>
           {# Ícone de seta do Font Awesome indicando avanço/continuidade #}
           <i class="fa-solid fa-circle-arrow-right"></i>

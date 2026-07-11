@@ -24,7 +24,11 @@ urlpatterns = [
     # O argumento name='post' serve para você referenciar essa URL nos templates ou views 
     # sem precisar escrever o caminho "post/" manualmente (URL Reverse).
     path('post/', post, name='post'),
-    
+
+    # Rota para a página de um post específico: captura um texto amigável (slug) da URL, 
+    # envia para a view 'post' e dá o nome de 'post' para essa rota.
+    path('post/<slug:slug>/', post, name='post'),
+
     # Faz o mesmo que o de cima: mapeia o endereço 'seusite.com/page/' para a função 'page'.
     path('page/', page, name='page'),
 ]

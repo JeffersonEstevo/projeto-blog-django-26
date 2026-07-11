@@ -11,10 +11,10 @@
         {# Container estilizado (geralmente via CSS Grid) para organizar os cartões de posts de forma alinhada #}
         <div class="card-grid">
           
-          {# Um truque inteligente do Django para fazer o loop rodar exatamente 9 vezes (preenchendo uma string com 9 espaços) #}
-          {# Isso simula 9 repetições na tela antes de você conectar com os posts reais do banco de dados #}
-          {% for i in ""|ljust:"9" %}
-            
+          {# Inicia um loop 'for' para iterar sobre cada item dentro de 'page_obj' #}
+          {# 'page_obj' geralmente representa o objeto da página atual em um sistema de paginação #}
+          {% for post in page_obj %}  
+           
             {# Inclui o componente visual de um cartão de post isolado (_post-card.html) #}
             {# A diretiva 'with i=forloop.counter0' passa o índice atual do loop (de 0 a 8) para dentro do card #}
             {% include 'blog/partials/_post-card.html' with i=forloop.counter0 %}
