@@ -18,15 +18,11 @@ PER_PAGE = 9
 # Define a função da view chamada 'index', que 
 # recebe os dados da requisição do usuário através do argumento 'request'
 def index(request): 
-    # Cria uma consulta (QuerySet) no banco de dados para buscar os posts
-    posts = (
-        Post
-        .objects # Acessa o gerenciador do banco de dados do modelo Post
-        # Filtra para trazer apenas os posts que estão publicados
-        .filter(is_published=True) 
-        # Ordena os posts de forma decrescente (do mais novo para o mais antigo)
-        .order_by('-pk') 
-    )
+    # Chama o gerenciador customizado do modelo Post, 
+    # executa o método get_published() 
+    # (que filtra os publicados e ordena por ID decrescente) 
+    # e armazena o resultado na variável 'posts'.
+    posts = Post.objects.get_published()
 
     # Inicializa o paginador do Django, 
     # passando a lista de posts e a quantidade permitida por página

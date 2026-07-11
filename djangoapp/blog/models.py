@@ -169,6 +169,22 @@ class Page(models.Model):
     def __str__(self) -> str:
         return self.title
 
+# Define um gerenciador (Manager) personalizado para o modelo, 
+# herdando da classe base do Django
+class PostManager(models.Manager):
+    
+    # Define um método customizado 
+    # que funcionará como uma "query pronta" (QuerySet)
+    def get_published(self):
+        # Retorna o próprio objeto 
+        # (self representa o Manager) com filtros aplicados
+        return (self
+            # Filtra os registros onde o campo 
+            # 'is_published' é verdadeiro (True)
+            .filter(is_published=True)
+            # Ordena os resultados pelo ID primário (pk) 
+            # de forma decrescente (do mais novo para o mais antigo)
+            .order_by('-pk'))
 
 # Define o modelo principal 'Post' que representará 
 # a tabela de artigos no banco de dados
@@ -179,6 +195,10 @@ class Post(models.Model):
         verbose_name = 'Post'          
         # Nome do modelo no plural no painel administrativo
         verbose_name_plural = 'Posts'   
+
+    # Substitui o gerenciador padrão do Django (models.Manager) pelo seu gerenciador personalizado,
+    # permitindo que você use Post.objects.get_published() em todo o seu projeto.
+    objects = PostManager()
 
     # Campo de texto curto para o título do post (máximo de 65 caracteres)
     title = models.CharField(max_length=65,)
