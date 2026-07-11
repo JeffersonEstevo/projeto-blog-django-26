@@ -182,21 +182,29 @@ class PostAdmin(SummernoteModelAdmin):
     # precisam ter o 'search_fields' configurado.
     autocomplete_fields = 'tags', 'category',
 
-    # Define um método (comum no Django Admin ou Model) que recebe a instância atual (self) e o objeto em questão (obj)
+    # Define um método que recebe a própria classe (self) 
+    # e a instância do objeto que está sendo listado (obj)
     def link(self, obj):
-        # Verifica se o objeto ainda não foi salvo no banco de dados (se não tem chave primária/ID)
+        # Verifica se o objeto atual não possui uma chave primária (ID), 
+        # ou seja, ainda não foi salvo no banco
         if not obj.pk:
-            # Se não tiver ID (ex: criando um post novo), retorna apenas um traço para não quebrar a página
+            # Retorna apenas um traço caso o objeto seja novo, 
+            # evitando gerar um link quebrado
             return '-'
 
-        # Obtém a URL pública do post chamando o método 'get_absolute_url' definido no próprio modelo
+        # Invoca o método do modelo para capturar 
+        # a URL final/canônica daquele post específico
         url_do_post = obj.get_absolute_url()
         
-        # Cria uma tag HTML de link (<a>) que abre em uma nova aba (target="_blank") e a marca como segura.
-        # Sem o mark_safe, o Django exibiria o texto puro do HTML na tela em vez de um link clicável.
+        # Monta a tag HTML <a> de forma segura, 
+        # garantindo que o Django renderize o link em vez do texto puro da tag
         safe_link = mark_safe(
             f'<a target="_blank" href="{url_do_post}">Ver post</a>'
         )
+
+        # Retorna o link HTML perfeitamente formatado e seguro 
+        # para ser exibido na tela (geralmente no Django Admin)
+        return safe_link
 
     def save_model(self, request, obj, form, change):
         # O Django passa o booleano 'change' como True se 
