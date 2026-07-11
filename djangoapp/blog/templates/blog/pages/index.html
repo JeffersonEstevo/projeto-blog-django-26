@@ -8,19 +8,31 @@
     <div class="section-content-wide">
       <div class="section-gap">
 
-        {# Container estilizado (geralmente via CSS Grid) para organizar os cartões de posts de forma alinhada #}
-        <div class="card-grid">
-          
-          {# Inicia um loop 'for' para iterar sobre cada item dentro de 'page_obj' #}
-          {# 'page_obj' geralmente representa o objeto da página atual em um sistema de paginação #}
-          {% for post in page_obj %}  
-           
-            {# Inclui o componente visual de um cartão de post isolado (_post-card.html) #}
-            {# A diretiva 'with i=forloop.counter0' passa o índice atual do loop (de 0 a 8) para dentro do card #}
-            {% include 'blog/partials/_post-card.html' with i=forloop.counter0 %}
-            
-          {% endfor %}
-        </div>
+        {# Verifica se o objeto de paginação 'page_obj' existe e contém posts #}
+        {% if page_obj %}
+          {# Cria um container visual utilizando uma classe CSS de grid para organizar os cards #}
+          <div class="card-grid">
+            {# Inicia um loop para percorrer cada 'post' dentro da página atual (page_obj) #}
+            {% for post in page_obj %}
+              {# Inclui um pedaço de HTML externo (_post-card.html) e passa para ele o índice atual do loop (começando do 0) através da variável 'i' #}
+              {% include 'blog/partials/_post-card.html' with i=forloop.counter0 %}
+            {# Finaliza o loop de posts #}
+            {% endfor %}
+          </div>
+        {# Caso o 'page_obj' esteja vazio (ou seja, nenhum post foi encontrado) #}
+        {% else %}
+          {# Cria um container estruturado para exibir uma mensagem amigável de erro/vazio #}
+          <div class="not-found center">
+            <h1>Nada encontrado 😔</h1>
+            <p>
+              Não encontrei nada nesse link, por favor, clique em outro 
+              link do nosso blog ou vá para a 
+              {# Gera dinamicamente a URL que aponta para a página inicial do blog (Home) #}
+              <a href="{% url 'blog:index' %}">Home</a>.
+            </p>
+          </div>
+        {# Finaliza a estrutura condicional do IF #}
+        {% endif %}
 
       </div>
     </div>

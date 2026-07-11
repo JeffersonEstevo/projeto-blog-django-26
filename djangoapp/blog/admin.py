@@ -9,6 +9,12 @@ from blog.models import Category, Tag, Page, Post
 # rico (WYSIWYG), permitindo formatar texto, inserir imagens, links, etc.
 from django_summernote.admin import SummernoteModelAdmin
 
+# Importa a função 'reverse' para resolver URLs a partir do nome da rota 
+from django.urls import reverse
+# Importa a função que avisa o Django que o HTML gerado é seguro 
+# e não deve ser "escapado" (proteção contra XSS)
+from django.utils.safestring import mark_safe
+
 # O decorator @admin.register vincula a classe TagAdmin 
 # diretamente ao modelo Tag,
 # dizendo ao Django que esta classe controlará 
@@ -157,7 +163,10 @@ class PostAdmin(SummernoteModelAdmin):
     
     # Define campos que serão apenas para leitura, 
     # impedindo que o usuário os altere manualmente no formulário
-    readonly_fields = 'created_at', 'updated_at', 'created_by', 'updated_by',
+    readonly_fields = (
+        'created_at', 'updated_at', 'created_by', 'updated_by',
+        'link',
+    )
     
     # Preenche o campo 'slug' de forma automática via JavaScript 
     # enquanto você digita o 'title' no formulário
@@ -172,6 +181,22 @@ class PostAdmin(SummernoteModelAdmin):
     # Nota: Para funcionar, os admins de 'Tag' e 'Category' 
     # precisam ter o 'search_fields' configurado.
     autocomplete_fields = 'tags', 'category',
+
+    # Define um método (comum no Django Admin ou Model) que recebe a instância atual (self) e o objeto em questão (obj)
+    def link(self, obj):
+        # Verifica se o objeto ainda não foi salvo no banco de dados (se não tem chave primária/ID)
+        if not obj.pk:
+            # Se não tiver ID (ex: criando um post novo), retorna apenas um traço para não quebrar a página
+            return '-'
+
+        # Obtém a URL pública do post chamando o método 'get_absolute_url' definido no próprio modelo
+        url_do_post = obj.get_absolute_url()
+        
+        # Cria uma tag HTML de link (<a>) que abre em uma nova aba (target="_blank") e a marca como segura.
+        # Sem o mark_safe, o Django exibiria o texto puro do HTML na tela em vez de um link clicável.
+        safe_link = mark_safe(
+            f'<a target="_blank" href="{url_do_post}">Ver post</a>'
+        )
 
     def save_model(self, request, obj, form, change):
         # O Django passa o booleano 'change' como True se 

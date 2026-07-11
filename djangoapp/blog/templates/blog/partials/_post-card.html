@@ -5,7 +5,8 @@
     {# Container que envolve e limita as proporções da imagem de capa do card #}
     <div class="card-cover-wrapper">
       {# Link que envolve a imagem para permitir que o usuário clique na foto para abrir o post #}
-      <a href="{% url 'blog:post' post.slug %}" class="card-cover-link">
+      {# Cria um link invisível ou que cobre o card inteiro (geralmente uma imagem), direcionando o usuário para a URL do post #}
+      <a href="{{ post.get_absolute_url }}" class="card-cover-link">
         {# Elemento de imagem configurado com 'loading="lazy"' para otimizar a performance (só carrega quando entra na tela) #}
         {# O src utiliza o serviço Picsum com a variável '{{ i }}' anexada ao final para garantir que cada card gere uma imagem aleatória diferente no loop #}
         <img 
@@ -26,7 +27,8 @@
       {# Tag h2 usada para o título do card, mantendo a hierarquia correta já que o h1 está no cabeçalho da página #}
       <h2 class="card-title">
         {# Link do título que levará o leitor até a página completa do artigo #}
-        <a href="{% url 'blog:post' post.slug %}" class="card-title-link">
+        {# Cria um link estilizado especificamente para o título do post, direcionando para a URL do post #}
+        <a href="{{ post.get_absolute_url }}" class="card-title-link">
           {{ post.title }}
         </a>
       </h2>
@@ -42,7 +44,8 @@
       {# Rodapé interno do card reservado para botões e interações (curtidas, compartilhamentos ou 'leia mais') #}
       <div class="card-actions">
         {# Link explícito de chamada para ação (Call to Action) incentivando o clique #}
-        <a class="card-action-link" href="{% url 'blog:post' post.slug %}">
+        {#  Cria um link no formato de botão ou ação (como um "Ler mais"), direcionando para a URL do post #}
+        <a class="card-action-link" href="{{ post.get_absolute_url }}">
           <span>Read</span>
           {# Ícone de seta do Font Awesome indicando avanço/continuidade #}
           <i class="fa-solid fa-circle-arrow-right"></i>

@@ -4,53 +4,77 @@ from django.db import models
 # Importa a função utilitária personalizada que 
 # cria slugs únicos com sufixo aleatório
 from utils.rands import slugify_new
-# Importa o modelo padrão de usuários do Django para gerenciar autores e editores
+# Importa o modelo padrão de usuários do Django 
+# para gerenciar autores e editores
 from django.contrib.auth.models import User
-# Importa a função utilitária responsável por redimensionar e otimizar imagens
+# Importa a função utilitária responsável por 
+# redimensionar e otimizar imagens
 from utils.images import resize_image
 # Importa a classe abstrata de anexos do Django Summernote.
 # Ela já vem com a estrutura padrão para gerenciar os uploads 
 # feitos dentro do editor (como imagens e arquivos).
 from django_summernote.models import AbstractAttachment
+# Importa a função do Django que descobre a URL correta 
+# com base no nome da rota (definida no urls.py)
+from django.urls import reverse
 
-# Cria uma classe/modelo personalizado chamado 'PostAttachment' para gerenciar os arquivos anexados (uploads).
-# Herdando de 'AbstractAttachment', ela adquire toda a lógica de anexos nativa do Django Summernote.
+# Cria uma classe/modelo personalizado chamado 'PostAttachment' 
+# para gerenciar os arquivos anexados (uploads).
+# Herdando de 'AbstractAttachment', ela adquire 
+# toda a lógica de anexos nativa do Django Summernote.
 class PostAttachment(AbstractAttachment):
     
     # Sobrescreve o método 'save' padrão do Django. 
-    # Isso permite interceptar o fluxo para rodar regras personalizadas antes e depois de salvar o anexo.
+    # Isso permite interceptar o fluxo para rodar 
+    # regras personalizadas antes e depois de salvar o anexo.
     def save(self, *args, **kwargs):
         
-        # Regra de Fallback: Se o usuário/sistema não definiu um nome textual ('name') para o anexo,
-        # define automaticamente usando o nome físico do arquivo que foi upado ('file.name').
+        # Regra de Fallback: Se o usuário/sistema 
+        # não definiu um nome textual ('name') para o anexo,
+        # define automaticamente usando 
+        # o nome físico do arquivo que foi upado ('file.name').
         if not self.name:
             self.name = self.file.name
 
-        # Converte o caminho/nome atual do arquivo para string e guarda na variável 'current_file_name'.
-        # Isso serve como um "print" do estado do arquivo antes que o banco de dados processe o upload.
+        # Converte o caminho/nome atual do arquivo para string e 
+        # guarda na variável 'current_file_name'.
+        # Isso serve como um "print" do estado do arquivo 
+        # antes que o banco de dados processe o upload.
         current_file_name = str(self.file.name)
         
-        # Executa o método de salvamento da classe pai (AbstractAttachment/Model) para registrar o objeto no banco.
-        # Guarda o retorno desse processo (que geralmente é o próprio objeto salvo) na variável 'super_save'.
+        # Executa o método de salvamento da classe pai 
+        # (AbstractAttachment/Model) para registrar o objeto no banco.
+        # Guarda o retorno desse processo 
+        # (que geralmente é o próprio objeto salvo) na variável 'super_save'.
         super_save = super().save(*args, **kwargs)
         
-        # Inicializa um sinalizador (flag) como False. Ele será usado para identificar se o arquivo sofreu alterações.
+        # Inicializa um sinalizador (flag) como False. 
+        # Ele será usado para identificar se o arquivo sofreu alterações.
         file_changed = False
 
         # Verifica se o objeto de fato possui um arquivo válido associado.
         if self.file:
-            # Compara o nome que guardamos lá no início com o nome do arquivo atual pós-salvamento.
-            # O Django faz isso porque, se você subir um arquivo com o nome 'foto.jpg' e ele já existir no servidor, 
-            # o Django o renomeará automaticamente para algo como 'foto_xyz.jpg'. Se os nomes forem diferentes, 'file_changed' vira True.
+            # Compara o nome que guardamos lá no início 
+            # com o nome do arquivo atual pós-salvamento.
+            # O Django faz isso porque, se você subir um arquivo 
+            # com o nome 'foto.jpg' e ele já existir no servidor, 
+            # o Django o renomeará automaticamente para algo como 
+            # 'foto_xyz.jpg'. Se os nomes forem diferentes, 
+            # 'file_changed' vira True.
             file_changed = current_file_name != self.file.name
 
-        # Se o gatilho 'file_changed' foi ativado (ou seja, se é um arquivo novo ou modificado pelo storage)...
+        # Se o gatilho 'file_changed' foi ativado (ou seja, 
+        # se é um arquivo novo ou modificado pelo storage)...
         if file_changed:
-            # ...chama a função utilitária para redimensionar a imagem física no servidor.
-            # Define a largura máxima para 900px, otimiza o arquivo (True) e reduz a qualidade para 70% para economizar espaço.
+            # ...chama a função utilitária para 
+            # redimensionar a imagem física no servidor.
+            # Define a largura máxima para 900px, 
+            # otimiza o arquivo (True) e reduz a qualidade para 70% 
+            # para economizar espaço.
             resize_image(self.file, 900, True, 70)
 
-        # Retorna o resultado do salvamento original, concluindo o ciclo do método 'save' com sucesso.
+        # Retorna o resultado do salvamento original, 
+        # concluindo o ciclo do método 'save' com sucesso.
         return super_save
 
 # Define a tabela 'Tag' no banco de dados
@@ -288,6 +312,21 @@ class Post(models.Model):
     # o próprio título do post
     def __str__(self):
         return self.title
+
+    # Define o método padrão do Django para retornar a 
+    # URL canônica (o link direto) deste objeto específico
+    def get_absolute_url(self):
+        # Verifica se a instância atual (este post) NÃO está publicada
+        if not self.is_published:
+            # Se não estiver publicada, redireciona o usuário de volta para 
+            # a página inicial do blog
+            return reverse('blog:index')
+            
+        # Se o post estiver publicado, 
+        # gera a URL da página do post ('blog:post') 
+        # passando o 'slug' (a parte legível do link) 
+        # como argumento necessário da rota
+        return reverse('blog:post', args=(self.slug,))
 
     # Sobrescreve o método save() para interceptar o salvamento
     def save(self, *args, **kwargs):
