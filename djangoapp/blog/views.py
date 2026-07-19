@@ -45,10 +45,63 @@ def index(request):
     )
 
 
+def created_by(request, author_pk):
+    # Busca no banco de dados apenas os posts publicados 
+    # que pertencem ao autor com o ID (pk) recebido
+    posts = Post.objects.get_published()\
+        .filter(created_by__pk=author_pk)
+
+    # Configura a paginação, definindo quantos posts serão exibidos por página 
+    # (baseado na constante PER_PAGE)
+    paginator = Paginator(posts, PER_PAGE)
+    
+    # Pega o número da página atual direto da URL (ex: ?page=2). 
+    # Se não houver, assume a página 1
+    page_number = request.GET.get("page")
+    
+    # Recupera os posts específicos daquela página atual para enviar ao template
+    page_obj = paginator.get_page(page_number)
+
+    # Renderiza o template 'index.html' passando o objeto da página 
+    # (com os posts filtrados e paginados)
+    return render(
+        request,
+        'blog/pages/index.html',
+        {
+            'page_obj': page_obj,
+        }
+    )
+
+
+def category(request, slug):
+    # Busca no banco de dados apenas os posts publicados 
+    # que pertencem à categoria com o 'slug' recebido
+    posts = Post.objects.get_published()\
+        .filter(category__slug=slug)
+
+    # Configura a paginação para a lista de posts da categoria
+    paginator = Paginator(posts, PER_PAGE)
+    
+    # Pega o número da página atual através dos parâmetros da URL
+    page_number = request.GET.get("page")
+    
+    # Recupera os posts específicos daquela página da categoria
+    page_obj = paginator.get_page(page_number)
+
+    # Renderiza o mesmo template 'index.html', 
+    # reaproveitando a estrutura visual para exibir os posts filtrados
+    return render(
+        request,
+        'blog/pages/index.html',
+        {
+            'page_obj': page_obj,
+        }
+    )
+
 # O argumento 'request' (requisição) é obrigatório em todas as views.
 # Ele carrega os metadados da navegação do usuário 
 # (cookies, dados de formulários, se está logado, etc.).
-def page(request):
+def page(request, slug):
     # O return é obrigatório 
     # porque o Django espera uma resposta (HttpResponse).
     # A função render() processa o arquivo HTML e 
@@ -61,10 +114,38 @@ def page(request):
     )
 
 
-def post(request):
-    # Mesma lógica: recebe a requisição de quem acessou a URL do post
-    # e renderiza o HTML específico da página de post.
+def post(request, slug):
+    """
+    Esta é uma função de visualização (view) do Django.
+    Ela recebe a requisição do usuário ('request') e o 'slug' 
+    (a parte amigável da URL que identifica o post, ex: 'meu-primeiro-post').
+    """
+
+    # Busca o post no banco de dados
+    post = (
+        # Utiliza um gerenciador personalizado (Manager) para garantir 
+        # que apenas posts com o status "publicado" sejam considerados.
+        Post.objects.get_published()
+        
+        # Filtra a busca para encontrar o post que tenha exatamente 
+        # o 'slug' recebido na URL.
+        .filter(slug=slug)
+        
+        # Retorna o primeiro resultado encontrado ou 'None' caso 
+        # nenhum post com esse slug seja localizado.
+        .first()
+    )
+
+    # Renderiza e retorna a página HTML
     return render(
-        request,
-        'blog/pages/post.html'
+        # Passa a requisição original obrigatoriamente
+        request,       
+        # O caminho do template HTML que vai exibir a página               
+        'blog/pages/post.html',       
+        {
+            # O "contexto": um dicionário que envia dados do Python para o HTML.
+            # Aqui, a variável 'post' (encontrada acima) 
+            # fica disponível no template.
+            'post': post,
+        }
     )
