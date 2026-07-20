@@ -13,3 +13,45 @@
         </div>
     </div>
 </footer>
+
+{% comment %}
+    Script para inicializar o CodeMirror em blocos de código.
+    Ele varre a página procurando tags <pre>, identifica a linguagem 
+    dinamicamente (via data-attribute) e as transforma em editores formatados (read-only) com o tema Dracula.
+{% endcomment %}
+<script>
+  (function () {
+    // Garante que o script só rode se as bibliotecas do CodeMirror tiverem sido carregadas no head
+    if (typeof CodeMirror == 'undefined') return;
+
+    // Seleciona todos os blocos de código (tags <pre>) da página
+    const codes = document.querySelectorAll('pre');
+
+    for (const code of codes) {
+      // Captura o idioma definido no atributo 'data-language' (ex: data-language="python")
+      const language = code.dataset.language || null;
+      const text = code.textContent || code.innerText;
+
+      // Configurações visuais e de comportamento do CodeMirror
+      const config = {
+        value: text,
+        tabSize: 2,
+        mode: language,            // Define o realce de sintaxe baseado na linguagem capturada
+        theme: 'dracula',          // Aplica o tema escuro Dracula
+        lineNumbers: true,         // Exibe os números das linhas
+        styleActiveLine: true,     // Destaca a linha ativa
+        styleActiveSelected: true,
+        lineWrapping: false,       // Desativa a quebra automática de linha (adiciona scrollbar se necessário)
+        line: true,
+        readOnly: true,            // Garante que o leitor não consiga editar o código exposto
+        viewportMargin: 50,
+        matchBrackets: true,       // Destaca a abertura/fechamento de chaves, colchetes e parênteses
+      };
+
+      // Substitui dinamicamente a tag <pre> original pelo container renderizado do CodeMirror
+      const editor = CodeMirror(function (node) {
+        code.parentNode.replaceChild(node, code);
+      }, config);
+    }
+  })();
+</script>

@@ -6,6 +6,8 @@
 <head>
   {# Injeta dinamicamente todo o conteúdo do arquivo '_head.html' que está localizado na pasta de parciais do blog #}
   {% include 'blog/partials/_head.html' %}
+  {# Bloco para páginas filhas injetarem CSS/JS específicos no head #}
+  {% block additional_head %}{% endblock additional_head %}
 </head>
 
 <body>
