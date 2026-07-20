@@ -86,6 +86,10 @@
         </p>
 
         <div class="separator"></div>
+
+        <div class="single-post-content">
+          {{ post.content | safe  }}  
+
           {# Verifica se o post possui alguma tag associada no banco de dados #}
           {% if post.tags.exists %}
 
@@ -110,7 +114,6 @@
             </div>
 
           {% endif %} {# Fim da verificação de existência #}
-        
         </div>
 
       </div>
