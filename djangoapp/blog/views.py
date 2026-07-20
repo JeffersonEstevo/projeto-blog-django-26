@@ -98,6 +98,30 @@ def category(request, slug):
         }
     )
 
+# View responsável por listar os posts filtrados por uma tag específica
+def tag(request, slug):
+    # Busca apenas os posts publicados que contenham a tag com o 'slug' recebido na URL
+    posts = Post.objects.get_published()\
+        .filter(tags__slug=slug)
+
+    # Configura a paginação dividindo a lista de posts com base na constante PER_PAGE
+    paginator = Paginator(posts, PER_PAGE)
+    
+    # Obtém o número da página atual a partir dos parâmetros da URL (ex: ?page=2)
+    page_number = request.GET.get("page")
+    
+    # Retorna o objeto da página correspondente (trata automaticamente páginas inválidas ou fora de alcance)
+    page_obj = paginator.get_page(page_number)
+
+    # Renderiza o template do blog passando os posts paginados no contexto
+    return render(
+        request,
+        'blog/pages/index.html',
+        {
+            'page_obj': page_obj,
+        }
+    )
+
 # O argumento 'request' (requisição) é obrigatório em todas as views.
 # Ele carrega os metadados da navegação do usuário 
 # (cookies, dados de formulários, se está logado, etc.).

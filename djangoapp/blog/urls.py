@@ -5,7 +5,7 @@
 # 'page' e 'post' do arquivo views.py do app 'blog'.
 # Sem esse import, o Django não saberia qual função 
 # executar quando o usuário acessasse a URL.
-from blog.views import index, page, post, category, created_by
+from blog.views import index, page, post, category, created_by, tag
 
 # Importa a função 'path' do Django, 
 # necessária para mapear as rotas de URL para as views correspondentes
@@ -49,6 +49,11 @@ urlpatterns = [
 
     # Exibe posts ou produtos de uma categoria específica 
     # usando o 'slug' dela (ex: /category/tecnologia/)
-    #
     path('category/<slug:slug>/', category, name='category'),
+
+    # Define a rota para filtrar posts por tag:
+    # 1. 'tag/<slug:slug>/' -> Captura o identificador amigável da tag na URL (ex: /tag/python/)
+    # 2. tag                -> Função/View que será executada quando a URL for acessada
+    # 3. name='tag'         -> Nome de identificação da rota (usado pelo {% url 'blog:tag' ... %})
+    path('tag/<slug:slug>/', tag, name='tag'),
 ]

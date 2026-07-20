@@ -162,6 +162,8 @@ cython_debug/
 #.idea/
 
 notes.txt
+notes.md
+converter.py
 media/
 project/local_settings.py
 /djangoapp/media/
