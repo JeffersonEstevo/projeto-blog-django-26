@@ -11,6 +11,10 @@ from blog.models import Post
 # gerenciar a divisão de dados em páginas
 from django.core.paginator import Paginator
 
+# Importa a classe Q do Django, permitindo criar consultas complexas 
+# com operadores lógicos (como o OU / OR)
+from django.db.models import Q
+
 # Define uma constante com o número máximo de posts 
 # que serão exibidos em cada página
 PER_PAGE = 9
@@ -119,6 +123,36 @@ def tag(request, slug):
         'blog/pages/index.html',
         {
             'page_obj': page_obj,
+        }
+    )
+
+# Define a view responsável por processar as buscas de posts no blog
+def search(request):
+    # Captura o termo de busca enviado via parâmetros GET na URL (ex: ?search=python) 
+    # e remove espaços extras no início e no fim
+    search_value = request.GET.get('search', '').strip()
+
+    # Busca no banco de dados apenas os posts publicados 
+    # que correspondem ao termo pesquisado
+    posts = (
+        Post.objects.get_published()
+        .filter(
+            # Utiliza a classe Q para buscar o termo simultaneamente 
+            # no título, no resumo ou no conteúdo completo do post (condição OU)
+            Q(title__icontains=search_value) |
+            Q(excerpt__icontains=search_value) |
+            Q(content__icontains=search_value)
+        )[:PER_PAGE]  # Limita a quantidade de resultados exibidos por página de acordo com a constante
+    )
+
+    # Renderiza o template HTML padrão de listagem, 
+    # enviando os posts encontrados e o valor da busca para o contexto
+    return render(
+        request,
+        'blog/pages/index.html',
+        {
+            'page_obj': posts,
+            'search_value': search_value,
         }
     )
 

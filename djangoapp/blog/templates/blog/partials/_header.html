@@ -17,7 +17,7 @@
          {% if site_setup.show_search %}
          <div class="search pb-base center">
             {# Formulário de busca utilizando o método GET para passar o termo digitado via URL #}
-            <form class="search-form" action="#" method="get">
+            <form class="search-form" action="{% url 'blog:search' %}" method="get">
                <div class="search-content">
                   {# Label invisível visualmente (sr-only), usada apenas por leitores de tela para acessibilidade #}
                   <label class="sr-only" id="search-label" for="search-input">Search</label>
@@ -29,7 +29,7 @@
                      name="search"
                      id="search-input"
                      placeholder="Search"
-                     value="Non risu potius quam oratione eiciendum? Quo pleb "
+                     value="{{ search_value }}"
                      >
                   
                   {# Botão de envio que utiliza a diretiva aria-labelledby para associar o botão ao label oculto #}

@@ -5,7 +5,7 @@
 # 'page' e 'post' do arquivo views.py do app 'blog'.
 # Sem esse import, o Django não saberia qual função 
 # executar quando o usuário acessasse a URL.
-from blog.views import index, page, post, category, created_by, tag
+from blog.views import index, page, post, category, created_by, tag, search
 
 # Importa a função 'path' do Django, 
 # necessária para mapear as rotas de URL para as views correspondentes
@@ -56,4 +56,10 @@ urlpatterns = [
     # 2. tag                -> Função/View que será executada quando a URL for acessada
     # 3. name='tag'         -> Nome de identificação da rota (usado pelo {% url 'blog:tag' ... %})
     path('tag/<slug:slug>/', tag, name='tag'),
+
+    # Define a rota para a página de busca:
+    # 1. 'search/' -> Define o caminho URL padrão para a funcionalidade de pesquisa (ex: /search/)
+    # 2. search    -> Função/View que processará a consulta e retornará os resultados quando a URL for acessada
+    # 3. name='search' -> Nome de identificação da rota (usado pelo {% url 'blog:search' ... %})
+    path('search/', search, name='search'),
 ]
