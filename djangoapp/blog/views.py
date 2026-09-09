@@ -4,8 +4,9 @@
 from django.shortcuts import render
 
 # Importa o modelo (tabela) 'Post' do app 'blog' 
+# Importa o modelo (tabela) 'Page' do app 'blog' 
 # para poder consultar os dados do banco
-from blog.models import Post
+from blog.models import Page, Post
 
 # Importa a classe do Django responsável por 
 # gerenciar a divisão de dados em páginas
@@ -160,6 +161,20 @@ def search(request):
 # Ele carrega os metadados da navegação do usuário 
 # (cookies, dados de formulários, se está logado, etc.).
 def page(request, slug):
+    # Realiza uma consulta (QuerySet) no banco de dados 
+    # através do Model Page
+    page = (
+        Page.objects
+        # Filtra apenas as páginas que estão publicadas (True)
+        .filter(is_published=True)
+        # Filtra o registro cujo campo 'slug' corresponde 
+        # ao slug recebido na variável
+        .filter(slug=slug)
+        # Retorna o primeiro resultado encontrado 
+        # (ou None se nenhum registro corresponder aos filtros)
+        .first()
+    )
+
     # O return é obrigatório 
     # porque o Django espera uma resposta (HttpResponse).
     # A função render() processa o arquivo HTML e 
@@ -168,7 +183,10 @@ def page(request, slug):
         # Passa a requisição adiante (obrigatório pelo render)
         request,    
         # O caminho do template que o Django deve renderizar              
-        'blog/pages/page.html'    
+        'blog/pages/page.html',
+        {
+            'page': page,
+        }    
     )
 
 

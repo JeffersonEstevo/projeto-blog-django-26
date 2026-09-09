@@ -174,6 +174,19 @@ class Page(models.Model):
     # (sem limite de caracteres)
     content = models.TextField()
 
+    # Define o método get_absolute_url para retornar 
+    # a URL canônica do objeto atual (self)
+    def get_absolute_url(self):
+        # Verifica se o objeto NÃO está publicado
+        if not self.is_published:
+            # Se não estiver publicado, retorna a URL 
+            # da página inicial/índice do blog
+            return reverse('blog:index')
+        
+        # Se estiver publicado, gera e retorna a URL 
+        # dinâmica da página individual usando o 'slug' do objeto
+        return reverse('blog:page', args=(self.slug,))
+
     # Sobrescreve o método padrão de salvamento do Django
     def save(self, *args, **kwargs):
         # Verifica se o slug está vazio. Se estiver, 
