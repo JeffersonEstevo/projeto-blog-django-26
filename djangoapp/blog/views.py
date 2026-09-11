@@ -31,6 +31,9 @@ PER_PAGE = 9
 # Define a função da view chamada 'index', que 
 # recebe os dados da requisição do usuário através do argumento 'request'
 def index(request): 
+    # Function Based Views -> São funções
+    # Class Based Views -> são classes (POOs)
+
     # Chama o gerenciador customizado do modelo Post, 
     # executa o método get_published() 
     # (que filtra os publicados e ordena por ID decrescente) 
