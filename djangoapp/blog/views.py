@@ -33,6 +33,8 @@ PER_PAGE = 9
 def index(request): 
     # Function Based Views -> São funções
     # Class Based Views -> são classes (POOs)
+    # Para mais informações consultar:
+    # https://docs.djangoproject.com/pt-br/4.2/ref/class-based-views/
 
     # Chama o gerenciador customizado do modelo Post, 
     # executa o método get_published() 
