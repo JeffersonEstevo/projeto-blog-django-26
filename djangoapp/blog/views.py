@@ -62,8 +62,8 @@ class PostListView(ListView):
     # Chama o gerenciador customizado do modelo Post, 
     # executa o método get_published() 
     # (que filtra os publicados e ordena por ID decrescente) 
-    # e armazena o resultado na variável 'posts'.
-    posts = Post.objects.get_published()
+    # e armazena o resultado na variável 'queryset'.
+    queryset = Post.objects.get_published()
 
     # Método opcional para filtrar os dados que serão exibidos na listagem
     # def get_queryset(self):
