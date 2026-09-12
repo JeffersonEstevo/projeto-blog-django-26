@@ -5,7 +5,9 @@
 # 'page' e 'post' do arquivo views.py do app 'blog'.
 # Sem esse import, o Django não saberia qual função 
 # executar quando o usuário acessasse a URL.
-from blog.views import index, page, post, category, created_by, tag, search
+# Importação do PostListView para criar páginas que exibem uma lista de posts
+from blog.views import (PostListView, category, created_by, page, post, search,
+                        tag)
 
 # Importa a função 'path' do Django, 
 # necessária para mapear as rotas de URL para as views correspondentes
@@ -18,9 +20,13 @@ app_name = 'blog'
 # Lista que armazena todas as rotas de URL específicas deste aplicativo
 urlpatterns = [
     
-    # Cria uma rota para a página inicial do app (URL vazia ''), 
-    # chama a view 'index' e dá o nome de 'index' para o link
-    path('', index, name='index'),
+    # Rota para a página inicial (raiz) do site.
+    # O caminho vazio ('') indica a URL base (ex: meudominio.com/).
+    # A classe PostListView é convertida em view pelo .as_view() 
+    # para listar os posts.
+    # O parâmetro name='index' permite referenciar esta URL 
+    # facilmente em templates e códigos.
+    path('', PostListView.as_view(), name='index'),
 
     # Define que se o usuário acessar 'seusite.com/post/', 
     # o Django chama a função 'post'.

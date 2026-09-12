@@ -24,13 +24,36 @@ from django.core.paginator import Paginator
 # com operadores lógicos (como o OU / OR)
 from django.db.models import Q
 
+# Importa a classe ListView genérica do Django para criar visualizações 
+# baseadas em classe focadas em listar registros de um modelo 
+# (ex: listar posts, produtos, usuários).
+from django.views.generic import ListView
+
 # Define uma constante com o número máximo de posts 
 # que serão exibidos em cada página
 PER_PAGE = 9
 
-# Define a função da view chamada 'index', que 
-# recebe os dados da requisição do usuário através do argumento 'request'
-def index(request): 
+# Define a classe da view baseada em classe (CBV) chamada 'PostListView', 
+# herdando de 'ListView' do Django para lidar automaticamente 
+# com a listagem de registros
+class PostListView(ListView):
+    # Define o modelo do banco de dados que será consultado
+    model = Post
+    
+    # Caminho do template HTML que será renderizado para exibir esta página
+    template_name = 'blog/pages/index.html'
+    
+    # Nome da variável de contexto usada no template para 
+    # acessar a lista de itens
+    context_object_name = 'posts'
+    
+    # Define a ordenação padrão dos resultados 
+    # (do mais recente para o mais antigo)
+    ordering = '-pk',
+    
+    # Quantidade de itens exibidos por página (habilita a paginação)
+    paginate_by = PER_PAGE
+    
     # Function Based Views -> São funções
     # Class Based Views -> são classes (POOs)
     # Para mais informações consultar:
@@ -42,28 +65,49 @@ def index(request):
     # e armazena o resultado na variável 'posts'.
     posts = Post.objects.get_published()
 
-    # Inicializa o paginador do Django, 
-    # passando a lista de posts e a quantidade permitida por página
-    paginator = Paginator(posts, PER_PAGE)
-    # Captura o número da página atual 
-    # a partir dos parâmetros da URL (ex: /?page=2)
-    page_number = request.GET.get("page")
+    # Método opcional para filtrar os dados que serão exibidos na listagem
+    # def get_queryset(self):
+        # Obtém o queryset padrão definido na classe
+        # queryset = super().get_queryset()
+        # Aplica um filtro adicional para trazer apenas os posts publicados
+        # queryset = queryset.filter(is_published=True)
+        # Retorna o queryset final modificado
+        # return queryset
 
-    # Busca os posts específicos daquela página 
-    # (se 'page' estiver vazio, traz a primeira página)
-    page_obj = paginator.get_page(page_number)
+    # Sobrescreve o método get_context_data para adicionar variáveis 
+    # personalizadas ao contexto enviado ao template
+    def get_context_data(self, **kwargs):
+        # Obtém o dicionário de contexto padrão que o Django já prepara 
+        # (incluindo a lista de posts, página atual, etc.)
+        context = super().get_context_data(**kwargs)
 
-    # Renderiza e renderiza a página HTML final para o usuário
-    return render(
-        request, # A requisição do usuário (obrigatório do Django)
-        'blog/pages/index.html', # O caminho do arquivo HTML que será exibido
-        {   # Passa os posts da página atual para o HTML conseguir listá-los
-            'page_obj': page_obj, 
-            # Passa o título da página atual para o HTML conseguir exibir
+        # Atualiza o dicionário de contexto adicionando 
+        # uma nova variável chamada 'page_title' com o valor 'Home - '
+        context.update({ 
             'page_title': 'Home - ',
-        }
-    )
+        })
+        
+        # Retorna o contexto atualizado para que o template HTML 
+        # possa utilizá-lo (ex: {{ page_title }})
+        return context
 
+# Define uma função de view (FBV) chamada 'index' que gerencia 
+# manualmente a listagem e paginação dos posts
+# def index(request):
+#     posts = Post.objects.get_published()
+
+#     paginator = Paginator(posts, PER_PAGE)
+#     page_number = request.GET.get("page")
+#     page_obj = paginator.get_page(page_number)
+
+#     return render(
+#         request,
+#         'blog/pages/index.html',
+#         {
+#             'page_obj': page_obj,
+#             'page_title': 'Home - ',
+#         }
+#     )
 
 def created_by(request, author_pk):
     # Busca o usuário no banco de dados 
@@ -83,14 +127,17 @@ def created_by(request, author_pk):
     posts = Post.objects.get_published()\
         .filter(created_by__pk=author_pk)
 
-    # Define o nome padrão para exibição como sendo o username (nome de usuário).
+    # Define o nome padrão para exibição como sendo o username 
+    # (nome de usuário).
     user_full_name = user.username
 
     # Verifica se o usuário possui um primeiro nome cadastrado. 
-    # Se tiver, sobrescreve user_full_name combinando o primeiro e o último nome.
+    # Se tiver, sobrescreve user_full_name combinando 
+    # o primeiro e o último nome.
     if user.first_name:
         user_full_name = f'{user.first_name} {user.last_name}'
-    # Cria o título personalizado da página combinando o nome do autor com um texto padrão.
+    # Cria o título personalizado da página combinando 
+    # o nome do autor com um texto padrão.
     page_title = 'Posts de ' + user_full_name + ' - '
 
     # Configura a paginação, definindo quantos posts serão exibidos por página 
@@ -247,11 +294,13 @@ def page(request, slug):
     )
 
     # Verifica se o objeto da página (page_obj) é nulo ou não foi encontrado.
-    # Caso seja None, interrompe a execução e retorna um erro 404 (Página Não Encontrada).
+    # Caso seja None, interrompe a execução e retorna um erro 404 
+    # (Página Não Encontrada).
     if page_obj is None:
         raise Http404()
 
-    # Define o título dinâmico da página utilizando o título do próprio objeto, seguido por um texto padrão.
+    # Define o título dinâmico da página utilizando 
+    # o título do próprio objeto, seguido por um texto padrão.
     page_title = f'{page_obj.title} - Página - '
 
     # O return é obrigatório 
@@ -292,12 +341,15 @@ def post(request, slug):
         .first()
     )
 
-    # Verifica se o objeto do post (post_obj) é nulo ou não foi encontrado no banco de dados.
-    # Caso seja None, interrompe a execução e retorna um erro 404 (Página Não Encontrada).
+    # Verifica se o objeto do post (post_obj) 
+    # é nulo ou não foi encontrado no banco de dados.
+    # Caso seja None, interrompe a execução e 
+    # retorna um erro 404 (Página Não Encontrada).
     if post_obj is None:
         raise Http404()
 
-    # Define o título dinâmico da página utilizando o título do próprio post, seguido por um texto padrão.
+    # Define o título dinâmico da página utilizando o título do próprio post, 
+    # seguido por um texto padrão.
     page_title = f'{post_obj.title} - Post - '
 
     # Renderiza e retorna a página HTML

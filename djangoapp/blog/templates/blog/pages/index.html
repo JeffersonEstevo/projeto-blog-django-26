@@ -8,12 +8,12 @@
     <div class="section-content-wide">
       <div class="section-gap">
 
-        {# Verifica se o objeto de paginação 'page_obj' existe e contém posts #}
-        {% if page_obj %}
+        {# Verifica se o objeto de paginação 'posts' existe e contém posts #}
+        {% if posts %}
           {# Cria um container visual utilizando uma classe CSS de grid para organizar os cards #}
           <div class="card-grid">
-            {# Inicia um loop para percorrer cada 'post' dentro da página atual (page_obj) #}
-            {% for post in page_obj %}
+            {# Inicia um loop para percorrer cada 'post' dentro da página atual (posts) #}
+            {% for post in posts %}
               {# Inclui um pedaço de HTML externo (_post-card.html) e passa para ele o índice atual do loop (começando do 0) através da variável 'i' #}
               {% include 'blog/partials/_post-card.html' with i=forloop.counter0 %}
             {# Finaliza o loop de posts #}
