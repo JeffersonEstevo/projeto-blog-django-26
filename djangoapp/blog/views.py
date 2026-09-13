@@ -1,7 +1,8 @@
 # É necessário importar a função render, que é um atalho do Django para 
 # juntar um arquivo HTML (template) com os dados do banco de dados e 
 # entregar ao navegador.
-from django.shortcuts import render
+# Importa atalhos do Django para redirecionamento e renderização de templates
+from django.shortcuts import redirect, render
 
 # Importa o modelo (tabela) 'Post' do app 'blog' 
 # Importa o modelo (tabela) 'Page' do app 'blog' 
@@ -14,7 +15,8 @@ from django.contrib.auth.models import User
 
 # Importa a exceção Http404 para disparar uma página de erro 404 
 # (Página Não Encontrada) quando um registro não for encontrado.
-from django.http import Http404
+# Importa exceções HTTP (como o 404) e classes de requisição/resposta do Django
+from django.http import Http404, HttpRequest, HttpResponse
 
 # Importa a classe do Django responsável por 
 # gerenciar a divisão de dados em páginas
@@ -29,6 +31,13 @@ from django.db.models import Q
 # (ex: listar posts, produtos, usuários).
 from django.views.generic import ListView
 
+# Importa o tipo Any para fins de tipagem estática (Type Hinting)
+from typing import Any  
+
+# Importa a classe QuerySet do Django para tipagem de consultas ao banco
+from django.db.models.query import QuerySet  
+
+
 # Define uma constante com o número máximo de posts 
 # que serão exibidos em cada página
 PER_PAGE = 9
@@ -37,19 +46,12 @@ PER_PAGE = 9
 # herdando de 'ListView' do Django para lidar automaticamente 
 # com a listagem de registros
 class PostListView(ListView):
-    # Define o modelo do banco de dados que será consultado
-    model = Post
-    
     # Caminho do template HTML que será renderizado para exibir esta página
     template_name = 'blog/pages/index.html'
     
     # Nome da variável de contexto usada no template para 
     # acessar a lista de itens
     context_object_name = 'posts'
-    
-    # Define a ordenação padrão dos resultados 
-    # (do mais recente para o mais antigo)
-    ordering = '-pk',
     
     # Quantidade de itens exibidos por página (habilita a paginação)
     paginate_by = PER_PAGE
@@ -64,15 +66,6 @@ class PostListView(ListView):
     # (que filtra os publicados e ordena por ID decrescente) 
     # e armazena o resultado na variável 'queryset'.
     queryset = Post.objects.get_published()
-
-    # Método opcional para filtrar os dados que serão exibidos na listagem
-    # def get_queryset(self):
-        # Obtém o queryset padrão definido na classe
-        # queryset = super().get_queryset()
-        # Aplica um filtro adicional para trazer apenas os posts publicados
-        # queryset = queryset.filter(is_published=True)
-        # Retorna o queryset final modificado
-        # return queryset
 
     # Sobrescreve o método get_context_data para adicionar variáveis 
     # personalizadas ao contexto enviado ao template
@@ -90,24 +83,6 @@ class PostListView(ListView):
         # Retorna o contexto atualizado para que o template HTML 
         # possa utilizá-lo (ex: {{ page_title }})
         return context
-
-# Define uma função de view (FBV) chamada 'index' que gerencia 
-# manualmente a listagem e paginação dos posts
-# def index(request):
-#     posts = Post.objects.get_published()
-
-#     paginator = Paginator(posts, PER_PAGE)
-#     page_number = request.GET.get("page")
-#     page_obj = paginator.get_page(page_number)
-
-#     return render(
-#         request,
-#         'blog/pages/index.html',
-#         {
-#             'page_obj': page_obj,
-#             'page_title': 'Home - ',
-#         }
-#     )
 
 def created_by(request, author_pk):
     # Busca o usuário no banco de dados 
@@ -164,6 +139,83 @@ def created_by(request, author_pk):
         }
     )
 
+# Define uma View baseada em classe (CBV) personalizada que 
+# herda de PostListView
+class CreatedByListView(PostListView):  
+    # Método construtor (inicializador) da classe
+    def __init__(self, **kwargs: Any) -> None:  
+        # Executa o construtor da classe pai (PostListView) para 
+        # garantir inicializações padrão
+        super().__init__(**kwargs)  
+        # Cria um dicionário interno na instância para armazenar dados 
+        # temporários entre os métodos da view
+        self._temp_context: dict[str, Any] = {}  
+
+    # Sobrescreve o método do Django responsável por 
+    # enviar dados (contexto) para o template HTML
+    def get_context_data(self, **kwargs):  
+        # Obtém o dicionário de contexto padrão gerado pela classe pai
+        ctx = super().get_context_data(**kwargs)  
+        # Recupera o objeto de usuário armazenado previamente 
+        # no dicionário temporário
+        user = self._temp_context['user']  
+        # Define uma string padrão para o nome completo 
+        # utilizando o username do usuário
+        user_full_name = user.username  
+
+        # Verifica se o usuário possui um primeiro nome preenchido no cadastro
+        if user.first_name:  
+            # Se tiver, substitui pelo nome e sobrenome combinados
+            user_full_name = f'{user.first_name} {user.last_name}' 
+        # Monta uma string customizada para o título da página baseada no autor    
+        page_title = 'Posts de ' + user_full_name + ' - ' 
+        # Atualiza o dicionário de contexto existente com novos dados
+        ctx.update({  
+             # Adiciona a variável 'page_title' 
+             # para que ela possa ser exibida no template
+            'page_title': page_title, 
+        })
+        # Retorna o dicionário de contexto finalizado para a renderização
+        return ctx  
+
+    # Sobrescreve o método do Django que define 
+    # quais dados do banco serão buscados
+    def get_queryset(self) -> QuerySet[Any]:  
+        # Obtém o QuerySet básico inicial fornecido pela classe pai
+        qs = super().get_queryset()  
+        # Aplica um filtro no banco para trazer apenas os posts 
+        # cujo criador tenha o mesmo ID (pk) do usuário armazenado
+        qs = qs.filter(created_by__pk=self._temp_context['user'].pk)  
+        # Retorna o QuerySet filtrado com os posts específicos do autor
+        return qs  
+
+    # Sobrescreve o método HTTP GET do Django para interceptar a requisição 
+    # antes de processar a view
+    def get(self, request, *args, **kwargs):  
+        # Extrai o parâmetro 'author_pk' enviado através da URL 
+        # (capturado nas chaves da rota)
+        author_pk = self.kwargs.get('author_pk')  
+        # Consulta o banco de dados buscando o usuário com aquele ID, 
+        # retornando o primeiro encontrado (ou None)
+        user = User.objects.filter(pk=author_pk).first()  
+
+        # Verifica se o usuário consultado não existe no banco de dados
+        if user is None:  
+            # Se não existir, interrompe o fluxo imediatamente e 
+            # exibe uma página de Erro 404 (Não Encontrado) padrão do Django
+            raise Http404()  
+
+        # Salva os dados validados do autor no dicionário temporário 
+        # criado no __init__
+        self._temp_context.update({  
+            # Armazena o ID numérico do autor
+            'author_pk': author_pk,  
+            # Armazena o objeto completo do usuário encontrado
+            'user': user,  
+        })
+        # Devolve o controle para o método get() original da classe pai 
+        # para prosseguir com o ciclo de vida normal da view
+        return super().get(request, *args, **kwargs)  
 
 def category(request, slug):
     # Busca no banco de dados apenas os posts publicados 
