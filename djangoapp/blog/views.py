@@ -152,7 +152,8 @@ class CreatedByListView(PostListView):
         self._temp_context: dict[str, Any] = {}  
 
     # Sobrescreve o método do Django responsável por 
-    # enviar dados (contexto) para o template HTML
+    # enviar dados (contexto) para o template HTML 
+    # [verificar ordem de sobrescrita na documentação]
     def get_context_data(self, **kwargs):  
         # Obtém o dicionário de contexto padrão gerado pela classe pai
         ctx = super().get_context_data(**kwargs)  
