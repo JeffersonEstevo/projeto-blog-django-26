@@ -218,6 +218,45 @@ class CreatedByListView(PostListView):
         # para prosseguir com o ciclo de vida normal da view
         return super().get(request, *args, **kwargs)  
 
+# Define uma View baseada em classe (CBV) personalizada para 
+# listar posts filtrados por categoria, herdando de PostListView
+class CategoryListView(PostListView):
+    # Define que, caso a consulta não retorne nenhum objeto, 
+    # o Django exibirá uma página 404 em vez de uma lista vazia
+    allow_empty = False
+
+    # Sobrescreve o método responsável por definir o conjunto de dados 
+    # (queryset) que será consultado no banco de dados
+    def get_queryset(self) -> QuerySet[Any]:
+        # Obtém o queryset padrão da classe pai e o filtra para retornar 
+        # apenas os posts cuja categoria corresponda ao slug passado na URL
+        return super().get_queryset().filter(
+            category__slug=self.kwargs.get('slug')
+        )
+
+    # Sobrescreve o método do Django responsável por 
+    # enviar dados (contexto) para o template HTML
+    def get_context_data(self, **kwargs):
+        # Obtém o dicionário de contexto padrão gerado pela classe pai
+        ctx = super().get_context_data(**kwargs)
+        
+        # Monta uma string customizada para o título da página 
+        # utilizando o nome da categoria obtida através do primeiro post listado
+        page_title = (
+            f'{self.object_list[0].category.name}'  # type: ignore
+            ' - Categoria - '
+        )
+        
+        # Atualiza o dicionário de contexto existente com novos dados
+        ctx.update({
+            # Adiciona a variável 'page_title' 
+            # para que ela possa ser exibida no template
+            'page_title': page_title,
+        })
+        
+        # Retorna o dicionário de contexto finalizado para a renderização
+        return ctx
+
 def category(request, slug):
     # Busca no banco de dados apenas os posts publicados 
     # que pertencem à categoria com o 'slug' recebido
