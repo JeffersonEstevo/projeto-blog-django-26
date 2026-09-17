@@ -63,14 +63,20 @@ urlpatterns = [
     path('category/<slug:slug>/', CategoryListView.as_view(), name='category'),
 
     # Define a rota para filtrar posts por tag:
-    # 1. 'tag/<slug:slug>/' -> Captura o identificador amigável da tag na URL (ex: /tag/python/)
-    # 2. tag                -> Função/View que será executada quando a URL for acessada
-    # 3. name='tag'         -> Nome de identificação da rota (usado pelo {% url 'blog:tag' ... %})
+    # 1. 'tag/<slug:slug>/' -> Captura o identificador amigável da tag na URL 
+    # (ex: /tag/python/)
+    # 2. tag                -> Função/View que será executada 
+    # quando a URL for acessada
+    # 3. name='tag'         -> Nome de identificação da rota 
+    # (usado pelo {% url 'blog:tag' ... %})
     path('tag/<slug:slug>/', tag, name='tag'),
 
     # Define a rota para a página de busca:
-    # 1. 'search/' -> Define o caminho URL padrão para a funcionalidade de pesquisa (ex: /search/)
-    # 2. search    -> Função/View que processará a consulta e retornará os resultados quando a URL for acessada
-    # 3. name='search' -> Nome de identificação da rota (usado pelo {% url 'blog:search' ... %})
+    # 1. 'search/' -> Define o caminho URL padrão 
+    # para a funcionalidade de pesquisa (ex: /search/)
+    # 2. search    -> Função/View que processará a consulta e 
+    # retornará os resultados quando a URL for acessada
+    # 3. name='search' -> Nome de identificação da rota 
+    # (usado pelo {% url 'blog:search' ... %})
     path('search/', search, name='search'),
 ]
