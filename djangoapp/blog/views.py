@@ -2,6 +2,8 @@
 # juntar um arquivo HTML (template) com os dados do banco de dados e 
 # entregar ao navegador.
 # Importa atalhos do Django para redirecionamento e renderização de templates
+# porta a função atalho 'render' do Django, usada para combinar 
+# um template HTML com um dicionário de contexto e retornar uma resposta HTTP
 from django.shortcuts import render
 
 # Importa o modelo (tabela) 'Post' do app 'blog' 
@@ -16,6 +18,7 @@ from django.contrib.auth.models import User
 # Importa a exceção Http404 para disparar uma página de erro 404 
 # (Página Não Encontrada) quando um registro não for encontrado.
 # Importa exceções HTTP (como o 404) e classes de requisição/resposta do Django
+
 from django.http import Http404
 
 # Importa a classe do Django responsável por 
