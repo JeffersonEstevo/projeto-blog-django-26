@@ -2,7 +2,7 @@
 # juntar um arquivo HTML (template) com os dados do banco de dados e 
 # entregar ao navegador.
 # Importa atalhos do Django para redirecionamento e renderização de templates
-from django.shortcuts import redirect, render
+from django.shortcuts import render
 
 # Importa o modelo (tabela) 'Post' do app 'blog' 
 # Importa o modelo (tabela) 'Page' do app 'blog' 
@@ -16,7 +16,7 @@ from django.contrib.auth.models import User
 # Importa a exceção Http404 para disparar uma página de erro 404 
 # (Página Não Encontrada) quando um registro não for encontrado.
 # Importa exceções HTTP (como o 404) e classes de requisição/resposta do Django
-from django.http import Http404, HttpRequest, HttpResponse
+from django.http import Http404
 
 # Importa a classe do Django responsável por 
 # gerenciar a divisão de dados em páginas
@@ -257,80 +257,108 @@ class CategoryListView(PostListView):
         # Retorna o dicionário de contexto finalizado para a renderização
         return ctx
 
-def category(request, slug):
-    # Busca no banco de dados apenas os posts publicados 
-    # que pertencem à categoria com o 'slug' recebido
-    posts = Post.objects.get_published()\
-        .filter(category__slug=slug)
+# Exemplo de Function Based View
+# def category(request, slug):
+#     # Busca no banco de dados apenas os posts publicados 
+#     # que pertencem à categoria com o 'slug' recebido
+#     posts = Post.objects.get_published()\
+#         .filter(category__slug=slug)
 
-    # Configura a paginação para a lista de posts da categoria
-    paginator = Paginator(posts, PER_PAGE)
+#     # Configura a paginação para a lista de posts da categoria
+#     paginator = Paginator(posts, PER_PAGE)
     
-    # Pega o número da página atual através dos parâmetros da URL
-    page_number = request.GET.get("page")
+#     # Pega o número da página atual através dos parâmetros da URL
+#     page_number = request.GET.get("page")
     
-    # Recupera os posts específicos daquela página da categoria
-    page_obj = paginator.get_page(page_number)
+#     # Recupera os posts específicos daquela página da categoria
+#     page_obj = paginator.get_page(page_number)
 
-    # Verifica se a lista de objetos da página atual está vazia.
-    # Caso não haja nenhum item, interrompe a execução e retorna um 
-    # erro 404 (Página Não Encontrada).
-    if len(page_obj) == 0:
-        raise Http404()
+#     # Verifica se a lista de objetos da página atual está vazia.
+#     # Caso não haja nenhum item, interrompe a execução e retorna um 
+#     # erro 404 (Página Não Encontrada).
+#     if len(page_obj) == 0:
+#         raise Http404()
 
-    # Define o título dinâmico da página utilizando o nome da categoria 
-    # do primeiro item encontrado, seguido por um texto padrão.
-    page_title = f'{page_obj[0].category.name} - Categoria - '
+#     # Define o título dinâmico da página utilizando o nome da categoria 
+#     # do primeiro item encontrado, seguido por um texto padrão.
+#     page_title = f'{page_obj[0].category.name} - Categoria - '
 
-    # Renderiza o mesmo template 'index.html', 
-    # reaproveitando a estrutura visual para exibir os posts filtrados
-    return render(
-        request,
-        'blog/pages/index.html',
-        {
-            'page_obj': page_obj,
-            'page_title': page_title,
-        }
-    )
+#     # Renderiza o mesmo template 'index.html', 
+#     # reaproveitando a estrutura visual para exibir os posts filtrados
+#     return render(
+#         request,
+#         'blog/pages/index.html',
+#         {
+#             'page_obj': page_obj,
+#             'page_title': page_title,
+#         }
+#     )
 
-# View responsável por listar os posts filtrados por uma tag específica
-def tag(request, slug):
-    # Busca apenas os posts publicados que contenham a tag com o 'slug' 
-    # recebido na URL
-    posts = Post.objects.get_published()\
-        .filter(tags__slug=slug)
 
-    # Configura a paginação dividindo a lista de posts 
-    # com base na constante PER_PAGE
-    paginator = Paginator(posts, PER_PAGE)
+# Exemplo de Function Based View
+# # View responsável por listar os posts filtrados por uma tag específica
+# def tag(request, slug):
+#     # Busca apenas os posts publicados que contenham a tag com o 'slug' 
+#     # recebido na URL
+#     posts = Post.objects.get_published()\
+#         .filter(tags__slug=slug)
+
+#     # Configura a paginação dividindo a lista de posts 
+#     # com base na constante PER_PAGE
+#     paginator = Paginator(posts, PER_PAGE)
     
-    # Obtém o número da página atual 
-    # a partir dos parâmetros da URL (ex: ?page=2)
-    page_number = request.GET.get("page")
+#     # Obtém o número da página atual 
+#     # a partir dos parâmetros da URL (ex: ?page=2)
+#     page_number = request.GET.get("page")
     
-    # Retorna o objeto da página correspondente 
-    # (trata automaticamente páginas inválidas ou fora de alcance)
-    page_obj = paginator.get_page(page_number)
+#     # Retorna o objeto da página correspondente 
+#     # (trata automaticamente páginas inválidas ou fora de alcance)
+#     page_obj = paginator.get_page(page_number)
 
-    # Verifica se a lista de objetos da página atual está vazia.
-    # Caso não haja nenhum item, interrompe a execução e 
-    # retorna um erro 404 (Página Não Encontrada).
-    if len(page_obj) == 0:
-        raise Http404()
+#     # Verifica se a lista de objetos da página atual está vazia.
+#     # Caso não haja nenhum item, interrompe a execução e 
+#     # retorna um erro 404 (Página Não Encontrada).
+#     if len(page_obj) == 0:
+#         raise Http404()
 
-    # Define o título dinâmico da página utilizando o nome da primeira tag 
-    # associada ao primeiro item, seguido por um texto padrão.
-    page_title = f'{page_obj[0].tags.first().name} - Tag - '
+# Define uma View baseada em classe (CBV) personalizada que 
+# herda de PostListView para exibir posts filtrados por tags
+class TagListView(PostListView):
+    # Atributo do Django que define que a view deve retornar 
+    # um erro 404 (Http404) caso a lista de objetos venha vazia
+    allow_empty = False
 
-    # Renderiza o template do blog passando os posts paginados no contexto
-    return render(
-        request,
-        'blog/pages/index.html',
-        {
-            'page_obj': page_obj,
-            'page_title': page_title,
-        }
-    )
+    # Sobrescreve o método do Django responsável por 
+    # retornar o conjunto de consultas (QuerySet) base dos objetos
+    def get_queryset(self) -> QuerySet[Any]:
+        # Obtém o QuerySet padrão da classe pai e aplica um filtro 
+        # para trazer apenas os posts cuja tag corresponda ao slug recebido na URL
+        return super().get_queryset().filter(
+            tags__slug=self.kwargs.get('slug')
+        )
+
+    # Sobrescreve o método do Django responsável por 
+    # enviar dados (contexto) para o template HTML
+    def get_context_data(self, **kwargs):
+        # Obtém o dicionário de contexto padrão gerado pela classe pai
+        ctx = super().get_context_data(**kwargs)
+        
+        # Monta uma string customizada para o título da página utilizando 
+        # o nome da primeira tag associada ao primeiro objeto post da lista
+        page_title = (
+            f'{self.object_list[0].tags.first().name}'  # type: ignore
+            ' - Tag - '
+        )
+        
+        # Atualiza o dicionário de contexto existente com novos dados
+        ctx.update({
+             # Adiciona a variável 'page_title' 
+             # para que ela possa ser exibida no template
+            'page_title': page_title,    
+        })
+        
+        # Retorna o dicionário de contexto finalizado para a renderização
+        return ctx
 
 # Define a view responsável por processar as buscas de posts no blog
 def search(request):
