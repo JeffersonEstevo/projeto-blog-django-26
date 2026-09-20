@@ -7,7 +7,7 @@
 # executar quando o usuário acessasse a URL.
 # Importação do PostListView para criar páginas que exibem uma lista de posts
 from blog.views import (CategoryListView, CreatedByListView, PostListView,
-                        TagListView, page, post, search)
+                        SearchListView, TagListView, page, post)
 
 # Importa a função 'path' do Django, 
 # necessária para mapear as rotas de URL para as views correspondentes
@@ -78,5 +78,5 @@ urlpatterns = [
     # retornará os resultados quando a URL for acessada
     # 3. name='search' -> Nome de identificação da rota 
     # (usado pelo {% url 'blog:search' ... %})
-    path('search/', search, name='search'),
+    path('search/', SearchListView.as_view(), name='search'),
 ]

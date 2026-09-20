@@ -4,7 +4,7 @@
 # Importa atalhos do Django para redirecionamento e renderização de templates
 # porta a função atalho 'render' do Django, usada para combinar 
 # um template HTML com um dicionário de contexto e retornar uma resposta HTTP
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 
 # Importa o modelo (tabela) 'Post' do app 'blog' 
 # Importa o modelo (tabela) 'Page' do app 'blog' 
@@ -335,7 +335,8 @@ class TagListView(PostListView):
     # retornar o conjunto de consultas (QuerySet) base dos objetos
     def get_queryset(self) -> QuerySet[Any]:
         # Obtém o QuerySet padrão da classe pai e aplica um filtro 
-        # para trazer apenas os posts cuja tag corresponda ao slug recebido na URL
+        # para trazer apenas os posts cuja tag corresponda 
+        # ao slug recebido na URL
         return super().get_queryset().filter(
             tags__slug=self.kwargs.get('slug')
         )
@@ -363,18 +364,43 @@ class TagListView(PostListView):
         # Retorna o dicionário de contexto finalizado para a renderização
         return ctx
 
-# Define a view responsável por processar as buscas de posts no blog
-def search(request):
-    # Captura o termo de busca enviado via parâmetros 
-    # GET na URL (ex: ?search=python) 
-    # e remove espaços extras no início e no fim
-    search_value = request.GET.get('search', '').strip()
+# Define uma View baseada em classe (CBV) personalizada que 
+# herda de PostListView para lidar com funcionalidades de busca
+class SearchListView(PostListView): 
+    
+    # Método construtor (inicializador) da classe
+    def __init__(self, *args, **kwargs): 
+        # Executa o construtor da classe pai (PostListView) para 
+        # garantir inicializações padrão
+        super().__init__(*args, **kwargs)
 
-    # Busca no banco de dados apenas os posts publicados 
-    # que correspondem ao termo pesquisado
-    posts = (
-        Post.objects.get_published()
-        .filter(
+    # Sobrescreve o método setup do Django, executado antes de 
+    # qualquer outro método da view (ideal para inicializar dados da requisição)
+    def setup(self, request, *args, **kwargs): 
+        # Captura o parâmetro 'search' enviado via GET na URL, 
+        # removendo espaços em branco extras nas pontas com .strip()
+        self._search_value = request.GET.get('search', '').strip() 
+        
+        # Devolve o controle para o método setup original da classe pai 
+        # para prosseguir com o ciclo de vida normal da view
+        return super().setup(request, *args, **kwargs) 
+
+    # Sobrescreve o método do Django que define 
+    # quais dados do banco serão buscados
+    def get_queryset(self) -> QuerySet[Any]: 
+        # Armazena o termo de busca recuperado anteriormente 
+        # em uma variável local
+        search_value = self._search_value 
+        
+        # Obtém o QuerySet básico inicial da classe pai e 
+        # aplica filtros usando Q objects 
+        # para procurar o termo 
+        # (ignorando maiúsculas/minúsculas com icontains) no:
+        # - Título (title)
+        # - Resumo (excerpt)
+        # - Conteúdo (content)
+        # Limitando também o resultado à quantidade máxima por página (PER_PAGE)
+        return super().get_queryset().filter(
             # Utiliza a classe Q para buscar o termo simultaneamente 
             # no título, no resumo ou no conteúdo completo do post (condição OU)
             Q(title__icontains=search_value) |
@@ -382,21 +408,42 @@ def search(request):
             Q(content__icontains=search_value)
         )[:PER_PAGE]  # Limita a quantidade de resultados exibidos por 
                       # página de acordo com a constante
-    )
 
-    page_title = f'{search_value[:30]} - Search - '
-
-    # Renderiza o template HTML padrão de listagem, 
-    # enviando os posts encontrados e o valor da busca para o contexto
-    return render(
-        request,
-        'blog/pages/index.html',
-        {
-            'page_obj': posts,
+    # Sobrescreve o método do Django responsável por 
+    # enviar dados (contexto) para o template HTML
+    def get_context_data(self, **kwargs): 
+        # Obtém o dicionário de contexto padrão gerado pela classe pai
+        ctx = super().get_context_data(**kwargs) 
+        
+        # Recupera o termo de busca armazenado na instância
+        search_value = self._search_value 
+        
+        # Atualiza o dicionário de contexto existente 
+        # com novos dados para o template
+        ctx.update({ 
+            # Define o título da página exibindo 
+            # até 30 caracteres do termo buscado
+            'page_title': f'{search_value[:30]} - Search - ',
+            # Disponibiliza o termo de busca original 
+            # para reexibição no input do template
             'search_value': search_value,
-            'page_title': page_title,
-        }
-    )
+        })
+        
+        # Retorna o dicionário de contexto finalizado para a renderização
+        return ctx
+
+    # Sobrescreve o método HTTP GET do Django para interceptar a requisição 
+    # antes de processar a renderização da página
+    def get(self, request, *args, **kwargs): 
+        # Verifica se o usuário realizou uma busca vazia (sem digitar nada)
+        if self._search_value == '': 
+            # Se estiver vazio, interrompe o fluxo e redireciona 
+            # o usuário de volta para a página inicial do blog
+            return redirect('blog:index') 
+            
+        # Se houver conteúdo na busca, prossegue normalmente com o 
+        # fluxo padrão do método get() da classe pai
+        return super().get(request, *args, **kwargs)
 
 # O argumento 'request' (requisição) é obrigatório em todas as views.
 # Ele carrega os metadados da navegação do usuário 
