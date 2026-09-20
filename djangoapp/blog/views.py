@@ -32,10 +32,14 @@ from django.db.models import Q
 # Importa a classe ListView genérica do Django para criar visualizações 
 # baseadas em classe focadas em listar registros de um modelo 
 # (ex: listar posts, produtos, usuários).
-from django.views.generic import ListView
+# Importa a View baseada em classe genérica 'DetailView' do Django, 
+# que serve para exibir a página de detalhes de um único registro
+from django.views.generic import ListView, DetailView
 
 # Importa o tipo Any para fins de tipagem estática (Type Hinting)
-from typing import Any  
+# Importa o tipo de dado 'Dict' (dicionário) e 'Any' do módulo typing 
+# para realizar a tipagem estática do Python
+from typing import Dict, Any 
 
 # Importa a classe QuerySet do Django para tipagem de consultas ao banco
 from django.db.models.query import QuerySet  
@@ -445,49 +449,51 @@ class SearchListView(PostListView):
         # fluxo padrão do método get() da classe pai
         return super().get(request, *args, **kwargs)
 
-# O argumento 'request' (requisição) é obrigatório em todas as views.
-# Ele carrega os metadados da navegação do usuário 
-# (cookies, dados de formulários, se está logado, etc.).
-def page(request, slug):
-    # Realiza uma consulta (QuerySet) no banco de dados 
-    # através do Model Page
-    page_obj = (
-        Page.objects
-        # Filtra apenas as páginas que estão publicadas (True)
-        .filter(is_published=True)
-        # Filtra o registro cujo campo 'slug' corresponde 
-        # ao slug recebido na variável
-        .filter(slug=slug)
-        # Retorna o primeiro resultado encontrado 
-        # (ou None se nenhum registro corresponder aos filtros)
-        .first()
-    )
+# Define uma View baseada em classe (CBV) personalizada para 
+# exibir os detalhes de uma página específica, herdando de DetailView
+class PageDetailView(DetailView):
+    # Define o modelo (Model) do banco de dados que 
+    # será consultado por esta view
+    model = Page
+    
+    # Define o caminho e o nome do arquivo de template HTML que será renderizado
+    template_name = 'blog/pages/page.html'
+    
+    # Define qual campo do modelo será utilizado para buscar o objeto na URL
+    slug_field = 'slug'
+    
+    # Define o nome da variável que representará o objeto no template HTML
+    context_object_name = 'page'
 
-    # Verifica se o objeto da página (page_obj) é nulo ou não foi encontrado.
-    # Caso seja None, interrompe a execução e retorna um erro 404 
-    # (Página Não Encontrada).
-    if page_obj is None:
-        raise Http404()
-
-    # Define o título dinâmico da página utilizando 
-    # o título do próprio objeto, seguido por um texto padrão.
-    page_title = f'{page_obj.title} - Página - '
-
-    # O return é obrigatório 
-    # porque o Django espera uma resposta (HttpResponse).
-    # A função render() processa o arquivo HTML e 
-    # o transforma nessa resposta.
-    return render(
-        # Passa a requisição adiante (obrigatório pelo render)
-        request,    
-        # O caminho do template que o Django deve renderizar              
-        'blog/pages/page.html',
-        {
-            'page': page_obj,
+    # Sobrescreve o método do Django responsável por 
+    # enviar dados (contexto) adicionais para o template HTML
+    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
+        # Obtém o dicionário de contexto padrão gerado pela classe pai
+        ctx = super().get_context_data(**kwargs)
+        
+        # Obtém a instância da página atual que está sendo exibida
+        page = self.get_object()
+        
+        # Monta uma string customizada para o título da página 
+        # utilizando o título da página obtido do banco de dados
+        page_title = f'{page.title} - Página - '  # type: ignore
+        
+        # Atualiza o dicionário de contexto existente com novos dados
+        ctx.update({
+            # Adiciona a variável 'page_title' 
+            # para que ela possa ser exibida no template
             'page_title': page_title,
-        }    
-    )
+        })
 
+        # Retorna o dicionário de contexto finalizado para a renderização
+        return ctx
+    
+    # Sobrescreve o método responsável por definir o conjunto de dados 
+    # (queryset) que será consultado no banco de dados
+    def get_queryset(self) -> QuerySet[Any]:
+        # Obtém o queryset padrão da classe pai e o filtra para retornar 
+        # apenas a página caso ela esteja com o status de publicada (is_published=True)
+        return super().get_queryset().filter(is_published=True)
 
 def post(request, slug):
     """

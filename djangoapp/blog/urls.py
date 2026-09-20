@@ -6,8 +6,8 @@
 # Sem esse import, o Django não saberia qual função 
 # executar quando o usuário acessasse a URL.
 # Importação do PostListView para criar páginas que exibem uma lista de posts
-from blog.views import (CategoryListView, CreatedByListView, PostListView,
-                        SearchListView, TagListView, page, post)
+from blog.views import (CategoryListView, CreatedByListView, PageDetailView,
+                        PostListView, SearchListView, TagListView, post)
 
 # Importa a função 'path' do Django, 
 # necessária para mapear as rotas de URL para as views correspondentes
@@ -47,7 +47,7 @@ urlpatterns = [
 
     # Acessa uma página específica com base no seu 'slug' 
     # (um texto amigável para URLs, ex: /page/politica-de-privacidade/)
-    path('page/<slug:slug>/', page, name='page'),
+    path('page/<slug:slug>/', PageDetailView.as_view(), name='page'),
 
     # Filtra e exibe conteúdos criados por um autor específico 
     # usando o ID numérico dele (ex: /created_by/5/)
