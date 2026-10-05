@@ -1,10 +1,6 @@
-# É necessário importar a função render, que é um atalho do Django para 
-# juntar um arquivo HTML (template) com os dados do banco de dados e 
-# entregar ao navegador.
-# Importa atalhos do Django para redirecionamento e renderização de templates
-# porta a função atalho 'render' do Django, usada para combinar 
-# um template HTML com um dicionário de contexto e retornar uma resposta HTTP
-from django.shortcuts import redirect, render
+# Importa a função de atalho 'redirect' do Django, usada para redirecionar 
+# o usuário de uma URL para outra de forma simples e segura.
+from django.shortcuts import redirect
 
 # Importa o modelo (tabela) 'Post' do app 'blog' 
 # Importa o modelo (tabela) 'Page' do app 'blog' 
@@ -20,10 +16,6 @@ from django.contrib.auth.models import User
 # Importa exceções HTTP (como o 404) e classes de requisição/resposta do Django
 
 from django.http import Http404
-
-# Importa a classe do Django responsável por 
-# gerenciar a divisão de dados em páginas
-from django.core.paginator import Paginator
 
 # Importa a classe Q do Django, permitindo criar consultas complexas 
 # com operadores lógicos (como o OU / OR)
@@ -90,61 +82,6 @@ class PostListView(ListView):
         # Retorna o contexto atualizado para que o template HTML 
         # possa utilizá-lo (ex: {{ page_title }})
         return context
-
-def created_by(request, author_pk):
-    # Busca o usuário no banco de dados 
-    # utilizando a chave primária (pk) recebida. 
-    # O método .first() retorna o primeiro objeto encontrado 
-    # ou None se não existir.
-    user = User.objects.filter(pk=author_pk).first()
-
-    # Verifica se o usuário não foi encontrado no banco de dados. 
-    # Se for None, interrompe a execução e 
-    # retorna um erro 404 (Página Não Encontrada).
-    if user is None:
-        raise Http404()
-
-    # Busca no banco de dados apenas os posts publicados 
-    # que pertencem ao autor com o ID (pk) recebido
-    posts = Post.objects.get_published()\
-        .filter(created_by__pk=author_pk)
-
-    # Define o nome padrão para exibição como sendo o username 
-    # (nome de usuário).
-    user_full_name = user.username
-
-    # Verifica se o usuário possui um primeiro nome cadastrado. 
-    # Se tiver, sobrescreve user_full_name combinando 
-    # o primeiro e o último nome.
-    if user.first_name:
-        user_full_name = f'{user.first_name} {user.last_name}'
-    # Cria o título personalizado da página combinando 
-    # o nome do autor com um texto padrão.
-    page_title = 'Posts de ' + user_full_name + ' - '
-
-    # Configura a paginação, definindo quantos posts serão exibidos por página 
-    # (baseado na constante PER_PAGE)
-    paginator = Paginator(posts, PER_PAGE)
-    
-    # Pega o número da página atual direto da URL (ex: ?page=2). 
-    # Se não houver, assume a página 1
-    page_number = request.GET.get("page")
-    
-    # Recupera os posts específicos daquela página atual para enviar ao template
-    page_obj = paginator.get_page(page_number)
-
-    # Renderiza o template 'index.html' passando o objeto da página 
-    # (com os posts filtrados e paginados)
-    return render(
-        request,
-        'blog/pages/index.html',
-        {
-            'page_obj': page_obj,
-            # Passa a variável page_title dentro do dicionário de contexto 
-            # para ser renderizada no template HTML.
-            'page_title': page_title,
-        }
-    )
 
 # Define uma View baseada em classe (CBV) personalizada que 
 # herda de PostListView
@@ -263,70 +200,6 @@ class CategoryListView(PostListView):
         
         # Retorna o dicionário de contexto finalizado para a renderização
         return ctx
-
-# Exemplo de Function Based View
-# def category(request, slug):
-#     # Busca no banco de dados apenas os posts publicados 
-#     # que pertencem à categoria com o 'slug' recebido
-#     posts = Post.objects.get_published()\
-#         .filter(category__slug=slug)
-
-#     # Configura a paginação para a lista de posts da categoria
-#     paginator = Paginator(posts, PER_PAGE)
-    
-#     # Pega o número da página atual através dos parâmetros da URL
-#     page_number = request.GET.get("page")
-    
-#     # Recupera os posts específicos daquela página da categoria
-#     page_obj = paginator.get_page(page_number)
-
-#     # Verifica se a lista de objetos da página atual está vazia.
-#     # Caso não haja nenhum item, interrompe a execução e retorna um 
-#     # erro 404 (Página Não Encontrada).
-#     if len(page_obj) == 0:
-#         raise Http404()
-
-#     # Define o título dinâmico da página utilizando o nome da categoria 
-#     # do primeiro item encontrado, seguido por um texto padrão.
-#     page_title = f'{page_obj[0].category.name} - Categoria - '
-
-#     # Renderiza o mesmo template 'index.html', 
-#     # reaproveitando a estrutura visual para exibir os posts filtrados
-#     return render(
-#         request,
-#         'blog/pages/index.html',
-#         {
-#             'page_obj': page_obj,
-#             'page_title': page_title,
-#         }
-#     )
-
-
-# Exemplo de Function Based View
-# # View responsável por listar os posts filtrados por uma tag específica
-# def tag(request, slug):
-#     # Busca apenas os posts publicados que contenham a tag com o 'slug' 
-#     # recebido na URL
-#     posts = Post.objects.get_published()\
-#         .filter(tags__slug=slug)
-
-#     # Configura a paginação dividindo a lista de posts 
-#     # com base na constante PER_PAGE
-#     paginator = Paginator(posts, PER_PAGE)
-    
-#     # Obtém o número da página atual 
-#     # a partir dos parâmetros da URL (ex: ?page=2)
-#     page_number = request.GET.get("page")
-    
-#     # Retorna o objeto da página correspondente 
-#     # (trata automaticamente páginas inválidas ou fora de alcance)
-#     page_obj = paginator.get_page(page_number)
-
-#     # Verifica se a lista de objetos da página atual está vazia.
-#     # Caso não haja nenhum item, interrompe a execução e 
-#     # retorna um erro 404 (Página Não Encontrada).
-#     if len(page_obj) == 0:
-#         raise Http404()
 
 # Define uma View baseada em classe (CBV) personalizada que 
 # herda de PostListView para exibir posts filtrados por tags
@@ -492,53 +365,51 @@ class PageDetailView(DetailView):
     # (queryset) que será consultado no banco de dados
     def get_queryset(self) -> QuerySet[Any]:
         # Obtém o queryset padrão da classe pai e o filtra para retornar 
-        # apenas a página caso ela esteja com o status de publicada (is_published=True)
+        # apenas a página caso 
+        # ela esteja com o status de publicada (is_published=True)
         return super().get_queryset().filter(is_published=True)
 
-def post(request, slug):
-    """
-    Esta é uma função de visualização (view) do Django.
-    Ela recebe a requisição do usuário ('request') e o 'slug' 
-    (a parte amigável da URL que identifica o post, ex: 'meu-primeiro-post').
-    """
+# Define uma View baseada em classe (CBV) personalizada para 
+# exibir os detalhes de um post específico, herdando de DetailView
+class PostDetailView(DetailView):
+    # Define o modelo (Model) do banco de dados que 
+    # será consultado por esta view
+    model = Post
+    
+    # Define o caminho e o nome do arquivo de template HTML que será renderizado
+    template_name = 'blog/pages/post.html'
+    
+    # Define o nome da variável que representará o objeto no template HTML
+    context_object_name = 'post'
 
-    # Busca o post no banco de dados
-    post_obj = (
-        # Utiliza um gerenciador personalizado (Manager) para garantir 
-        # que apenas posts com o status "publicado" sejam considerados.
-        Post.objects.get_published()
+    # Sobrescreve o método do Django responsável por 
+    # enviar dados (contexto) adicionais para o template HTML
+    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
+        # Obtém o dicionário de contexto padrão gerado pela classe pai
+        ctx = super().get_context_data(**kwargs)
         
-        # Filtra a busca para encontrar o post que tenha exatamente 
-        # o 'slug' recebido na URL.
-        .filter(slug=slug)
+        # Obtém a instância do post atual que está sendo exibida
+        post = self.get_object()
         
-        # Retorna o primeiro resultado encontrado ou 'None' caso 
-        # nenhum post com esse slug seja localizado.
-        .first()
-    )
-
-    # Verifica se o objeto do post (post_obj) 
-    # é nulo ou não foi encontrado no banco de dados.
-    # Caso seja None, interrompe a execução e 
-    # retorna um erro 404 (Página Não Encontrada).
-    if post_obj is None:
-        raise Http404()
-
-    # Define o título dinâmico da página utilizando o título do próprio post, 
-    # seguido por um texto padrão.
-    page_title = f'{post_obj.title} - Post - '
-
-    # Renderiza e retorna a página HTML
-    return render(
-        # Passa a requisição original obrigatoriamente
-        request,       
-        # O caminho do template HTML que vai exibir a página               
-        'blog/pages/post.html',       
-        {
-            # O "contexto": um dicionário que envia dados do Python para o HTML.
-            # Aqui, a variável 'post' (encontrada acima) 
-            # fica disponível no template.
-            'post': post_obj,
+        # Monta uma string customizada para o título da página 
+        # utilizando o título do post obtido do banco de dados
+        page_title = f'{post.title} - Post - '  # type: ignore
+        
+        # Atualiza o dicionário de contexto existente com novos dados
+        ctx.update({
+            # Adiciona a variável 'page_title' 
+            # para que ela possa ser exibida no template
             'page_title': page_title,
-        }
-    )
+        })
+
+        # Retorna o dicionário de contexto finalizado para a renderização
+        return ctx
+
+    # Sobrescreve o método responsável por definir o conjunto de dados 
+    # (queryset) que será consultado no banco de dados
+    def get_queryset(self) -> QuerySet[Any]:
+        # Obtém o queryset padrão da classe pai e o filtra para retornar 
+        # apenas o post 
+        # caso ele esteja com o status de publicado (is_published=True)
+        return super().get_queryset().filter(is_published=True)
+    

@@ -1,13 +1,15 @@
 # Importa a função da view 'index' 
 # criada no arquivo views.py do seu aplicativo blog
 
-# É necessário importar as funções (ou classes) 
-# 'page' e 'post' do arquivo views.py do app 'blog'.
-# Sem esse import, o Django não saberia qual função 
-# executar quando o usuário acessasse a URL.
-# Importação do PostListView para criar páginas que exibem uma lista de posts
+# É necessário importar as views do arquivo views.py do app 'blog'.
+# Sem esses imports, o Django não saberia quais classes 
+# executar quando o usuário acessasse as respectivas URLs.
+# Importação de classes baseadas em views (CBVs) para gerenciar 
+# listagens (categorias, criadores, posts, buscas, tags) 
+# e detalhes (páginas, posts)
 from blog.views import (CategoryListView, CreatedByListView, PageDetailView,
-                        PostListView, SearchListView, TagListView, post)
+                        PostDetailView, PostListView, SearchListView,
+                        TagListView)
 
 # Importa a função 'path' do Django, 
 # necessária para mapear as rotas de URL para as views correspondentes
@@ -28,17 +30,15 @@ urlpatterns = [
     # facilmente em templates e códigos.
     path('', PostListView.as_view(), name='index'),
 
-    # Define que se o usuário acessar 'seusite.com/post/', 
-    # o Django chama a função 'post'.
+    # Define que se o usuário acessar 'seusite.com/post/<slug>/', 
+    # o Django chama a Class-Based View 'PostDetailView'.
     # O argumento name='post' serve para 
     # você referenciar essa URL nos templates ou views 
-    # sem precisar escrever o caminho "post/" manualmente (URL Reverse).
-    path('post/', post, name='post'),
-
+    # sem precisar escrever o caminho manualmente (URL Reverse).
     # Rota para a página de um post específico: 
     # captura um texto amigável (slug) da URL, 
-    # envia para a view 'post' e dá o nome de 'post' para essa rota.
-    path('post/<slug:slug>/', post, name='post'),
+    # envia para a view 'PostDetailView' e dá o nome de 'post' para essa rota.
+    path('post/<slug:slug>/', PostDetailView.as_view(), name='post'),
 
     # Faz o mesmo que o de cima: mapeia o endereço 
     # 'seusite.com/page/' para a função 'page'.
